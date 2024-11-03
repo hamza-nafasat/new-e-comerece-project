@@ -14,6 +14,7 @@ export interface CreateNewProductTypes {
   price: number;
   stock: number;
   category: string;
+  offerPrice: number;
   subCategory: string;
 }
 

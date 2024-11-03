@@ -73,6 +73,18 @@
             font-size: 1.5rem;
             font-weight: 500;
             color: black;
+            display: flex;
+            gap: 1rem;
+            > .firstSpan {
+              color: rgb(53, 52, 52);
+              font-size: 1.5rem;
+              font-weight: 400;
+              text-decoration: line-through;
+            }
+            > .secondSpan {
+              font-size: 1.5rem;
+              font-weight: 400;
+            }
           }
 
           > input,

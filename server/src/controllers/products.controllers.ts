@@ -15,7 +15,7 @@ import getDataUri from "../utils/uriParser.js";
 
 export const createNewProduct = TryCatch(
   async (req: Request<{}, {}, CreateNewProductTypes>, res: Response, next: NextFunction) => {
-    const { name, price, stock, category, subCategory } = req.body;
+    const { name, price, stock, category, subCategory, offerPrice = 0 } = req.body;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     // Separate the size chart photo and product photos based on their fieldname
@@ -66,6 +66,7 @@ export const createNewProduct = TryCatch(
       stock,
       category: category.toLowerCase(),
       subCategory: subCategory?.toLowerCase(),
+      offerPrice: Number(offerPrice),
       photos: photosCloud,
       sizeChartPhoto: {
         publicId: sizeChartPhotoCloud.public_id,
@@ -196,11 +197,17 @@ export const updateProduct = TryCatch(async (req, res, next) => {
   // Separate the size chart photo and product photos based on their fieldname
   const sizeChartPhoto = files.sizeChartPhoto ? files.sizeChartPhoto[0] : null;
   const productPhotos = files.photos || [];
-  const { name, stock, price, category, subCategory } = req.body;
+  const { name, stock, price, category, subCategory, offerPrice = 0 } = req.body;
   //// if not provided anything
   if (
-    (!name && !price && !stock && !category && !sizeChartPhoto && !productPhotos.length) ||
-    !subCategory
+    !name &&
+    !price &&
+    !stock &&
+    !category &&
+    !sizeChartPhoto &&
+    !productPhotos.length &&
+    !subCategory &&
+    !offerPrice
   ) {
     return next(new CustomError("Please Enter Something First", 400));
   }
@@ -212,6 +219,7 @@ export const updateProduct = TryCatch(async (req, res, next) => {
   if (price) product.price = price;
   if (category) product.category = category;
   if (subCategory) product.subCategory = subCategory;
+  if (offerPrice > 0) product.offerPrice = offerPrice;
   if (productPhotos) {
     // Upload product photos to Cloudinary
     const photosCloud = await Promise.all(

@@ -15,6 +15,7 @@ export type ProductTypes = {
   name: string;
   category: string;
   price: number;
+  offerPrice: number;
   stock: number;
   sizeChartPhoto: { publicId: string; url: string };
   createdAt: string;

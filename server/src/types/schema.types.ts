@@ -15,6 +15,7 @@ export interface ProductSchemaTypes {
   name: string;
   price: number;
   stock: number;
+  offerPrice: number;
   reviews: [{ name: string; rating: number; comment: string }];
   photos: { publicId: string; url: string }[];
   sizeChartPhoto: { publicId: string; url: string };

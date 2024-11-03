@@ -27,6 +27,7 @@ const SingleProductPage = () => {
     photos: [],
     sizeChartPhoto: { publicId: "", url: "" },
     createdAt: "",
+    offerPrice: 0,
     reviews: [],
     banner: "",
     otherImages: [],
@@ -141,11 +142,23 @@ const SingleProductPage = () => {
               <h4>{product?.name}</h4>
               <hr />
             </div>
-            <div>
-              <p>Product Price</p>
-              <h4>{product?.price}</h4>
-              <hr />
-            </div>
+
+            {product?.offerPrice > 0 ? (
+              <div>
+                <p>Product Price</p>
+                <h4>
+                  <span className="firstSpan">{product?.price}Rs</span>
+                  <span className="secondSpan">{product?.offerPrice}Rs</span>
+                </h4>
+                <hr />
+              </div>
+            ) : (
+              <div>
+                <p>Product Price</p>
+                <h4>{product?.price}</h4>
+                <hr />
+              </div>
+            )}
             <div>
               <p>Product Stock</p>
               <h4>{product?.stock}</h4>

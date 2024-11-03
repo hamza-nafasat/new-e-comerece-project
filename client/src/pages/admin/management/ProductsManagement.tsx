@@ -24,10 +24,11 @@ const ProductsManagement = () => {
   const { data, isLoading, isError, error, refetch } = useSingleProductQuery(params.id!);
 
   const [updatedName, setUpdatedName] = useState("");
-  const [updatedPrice, setUpdatedPrice] = useState(0);
-  const [updatedStock, setUpdatedStock] = useState(0);
+  const [updatedPrice, setUpdatedPrice] = useState<number>();
+  const [updatedStock, setUpdatedStock] = useState<number>();
   const [updatedCategory, setUpdatedCategory] = useState("");
   const [updatedSubCategory, setUpdatedSubCategory] = useState("");
+  const [updatedOfferPrice, setUpdatedOfferPrice] = useState<number>();
 
   const [oldPHotos, setOldPHotos] = useState<{ url: string; publicId: string }[]>([]);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
@@ -50,14 +51,15 @@ const ProductsManagement = () => {
 
   // Populate the fields with fetched data on load
   useEffect(() => {
-    if (data?.data) {
-      const { name, price, stock, category, subCategory, photos, sizeChartPhoto } = data.data;
+    if (data && data.data) {
+      const { name, price, stock, category, subCategory, photos, sizeChartPhoto, offerPrice } = data.data;
       setUpdatedName(name);
-      setUpdatedPrice(price);
-      setUpdatedStock(stock);
+      setUpdatedPrice(price as number);
+      setUpdatedStock(stock as number);
       setUpdatedCategory(category);
       setOldPHotos(photos);
       setUpdatedSubCategory(subCategory);
+      setUpdatedOfferPrice(offerPrice as number);
       setUpdatedSizeChartPhoto(sizeChartPhoto.url);
     }
   }, [data]);
@@ -112,15 +114,17 @@ const ProductsManagement = () => {
 
   // Form submission handler
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    console.log(updatedOfferPrice);
     e.preventDefault();
     setIsProductUpdateLoading(true);
 
     const formData = new FormData();
-    formData.set("name", updatedName);
-    formData.set("price", String(updatedPrice));
-    formData.set("stock", String(updatedStock));
-    formData.set("category", updatedCategory);
-    if (updatedSubCategory) formData.set("subCategory", updatedSubCategory);
+    formData.append("name", updatedName);
+    formData.append("price", String(updatedPrice! > 0 ? updatedPrice : 0));
+    formData.append("stock", String(updatedStock! > 0 ? updatedStock : 0));
+    formData.append("category", updatedCategory);
+    if (updatedOfferPrice! > 0) formData.append("offerPrice", String(updatedOfferPrice));
+    if (updatedSubCategory) formData.append("subCategory", updatedSubCategory);
 
     if (photoFiles.length > 0) {
       photoFiles.forEach((file) => formData.append("photos", file));
@@ -193,7 +197,7 @@ const ProductsManagement = () => {
                 ))}
             </div>
             <p>{updatedName}</p>
-            {updatedStock > 0 ? (
+            {updatedStock && updatedStock > 0 ? (
               <span className="green">{updatedStock} Available</span>
             ) : (
               <span className="red">Not Available</span>
@@ -228,9 +232,21 @@ const ProductsManagement = () => {
                 <input
                   type="number"
                   value={updatedPrice}
+                  step="1"
                   id="productPrice"
                   placeholder="Enter product price"
-                  onChange={(e) => setUpdatedPrice(Number(e.target.value))}
+                  onChange={(e) => setUpdatedPrice(parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div>
+                <label htmlFor="productOfferPrice">Offer Price:</label>
+                <input
+                  type="number"
+                  value={updatedOfferPrice}
+                  id="productOfferPrice"
+                  placeholder="Enter Offer price"
+                  step="1"
+                  onChange={(e) => setUpdatedOfferPrice(parseInt(e.target.value) || 0)}
                 />
               </div>
               <div>
@@ -238,9 +254,10 @@ const ProductsManagement = () => {
                 <input
                   type="number"
                   value={updatedStock}
+                  step="1"
                   id="productStock"
                   placeholder="Enter product stock"
-                  onChange={(e) => setUpdatedStock(Number(e.target.value))}
+                  onChange={(e) => setUpdatedStock(parseInt(e.target.value) || 0)}
                 />
               </div>
 

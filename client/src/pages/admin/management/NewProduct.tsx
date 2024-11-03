@@ -14,6 +14,7 @@ const NewProduct = () => {
   const [category, setCategory] = useState<string>("");
   const [subCategory, setSubCategory] = useState<string>("");
   const [price, setPrice] = useState<number>();
+  const [offerPrice, setOfferPrice] = useState<number>();
   const [stock, setStock] = useState<number>();
   const [photos, setPhotos] = useState<File[]>([]);
   const [previewPhotos, setPreviewPhotos] = useState<string[]>([]);
@@ -89,6 +90,7 @@ const NewProduct = () => {
       formData.append("stock", String(stock));
       formData.append("category", category);
       formData.append("subCategory", subCategory);
+      if (offerPrice) formData.append("offerPrice", String(offerPrice));
 
       // Add sizeChartPhoto as a single file
       formData.append("sizeChartPhoto", sizeChartPhoto);
@@ -134,6 +136,17 @@ const NewProduct = () => {
                 id="newProductPrice"
                 placeholder="Enter product price"
                 onChange={(e) => setPrice(Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <label htmlFor="newProductOfferPrice">Offer Price:</label>
+              <input
+                required
+                type="number"
+                value={offerPrice}
+                id="newProductOfferPrice"
+                placeholder="Enter product Offer price"
+                onChange={(e) => setOfferPrice(Number(e.target.value))}
               />
             </div>
             <div>
