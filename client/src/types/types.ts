@@ -36,10 +36,14 @@ export type CartItemType = {
   quantity: number;
   productId: string;
   stock: number;
+  category: string;
+  subCategory: string;
   photo: {
     publicId: string;
     url: string;
   };
+  productSize: string;
+  colorDescription: string;
 };
 
 export type NewOrderDateTypes = {

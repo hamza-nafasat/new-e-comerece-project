@@ -11,6 +11,9 @@ import { CartItemType } from "../types/types";
 import { responseToast } from "../utils/features";
 
 const SingleProductPage = () => {
+  const [size, setSize] = useState<string>("");
+  const [colorDescription, setColorDescription] = useState<string>("");
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const dispatch = useDispatch();
   const [addReviewForProduct] = useAddReviewMutation();
@@ -36,6 +39,23 @@ const SingleProductPage = () => {
 
   const addToCartHandler = (e: React.MouseEvent<HTMLButtonElement>, cartItem: CartItemType) => {
     try {
+      if (!cartItem.colorDescription || !cartItem.productSize) {
+        return toast.error("Please Select size and color");
+      }
+      if (
+        !cartItem?.colorDescription ||
+        !cartItem.name ||
+        !cartItem.price ||
+        !cartItem.productId ||
+        !cartItem.productSize ||
+        !cartItem.quantity ||
+        !cartItem.stock ||
+        !cartItem.photo ||
+        !cartItem.category ||
+        !cartItem.subCategory
+      ) {
+        return toast.error("Please Select All Fields");
+      }
       e.stopPropagation();
       if (cartItem.stock < 1) return toast.error(`${cartItem.name} is out of stock`);
       dispatch(addToCart(cartItem));
@@ -140,6 +160,28 @@ const SingleProductPage = () => {
               <p>Product Sub Category</p>
               <h4>{product?.subCategory}</h4>
             </div>
+            <div className="singleProductDetailsInputDiv">
+              <label htmlFor="size">Size</label>
+              <select name="size" id="size" value={size} onChange={(e) => setSize(e.target.value)}>
+                <option value="">Select Size</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+              </select>
+            </div>
+            <div className="singleProductDetailsInputDiv">
+              <label htmlFor="colorDescription">Color Description</label>
+              <input
+                type="text"
+                name="colorDescription"
+                id="colorDescription"
+                value={colorDescription}
+                onChange={(e) => setColorDescription(e.target.value)}
+              />
+            </div>
             <button
               onClick={(e) =>
                 addToCartHandler(e, {
@@ -149,6 +191,10 @@ const SingleProductPage = () => {
                   productId: product?._id,
                   stock: product?.stock,
                   quantity: 1,
+                  productSize: size,
+                  colorDescription: colorDescription,
+                  category: product?.category,
+                  subCategory: product?.subCategory,
                 })
               }
             >
@@ -158,13 +204,14 @@ const SingleProductPage = () => {
           </div>
         </section>
       </article>
-
-      <article className="clientReviews">
-        <h2>Top 5 Client Reviews</h2>
-        {product?.reviews?.map((review: any, i: number) => (
-          <ReviewsCard key={i} review={review} />
-        ))}
-      </article>
+      {product?.reviews?.length ? (
+        <article className="clientReviews">
+          <h2>Top 5 Client Reviews</h2>
+          {product?.reviews?.map((review: any, i: number) => (
+            <ReviewsCard key={i} review={review} />
+          ))}
+        </article>
+      ) : null}
 
       <ModalComponent
         isOpen={isModalOpen}

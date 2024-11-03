@@ -12,6 +12,7 @@ import { invalidateNodeCash, reduceStock, responseFunc } from "../utils/features
 // =========================================
 
 export const newOrderCreate = TryCatch(async (req: Request<{}, {}, newOrderReqTypes>, res, next) => {
+  console.log(req.body);
   const {
     cartItem,
     shippingInfo,

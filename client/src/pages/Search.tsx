@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { Skeleton } from "../components/Loader";
 import ProductCard from "../components/ProductCard";
 import { useAllSearchProductQuery, useHighestPriceQuery } from "../redux/api/productApi";
-import { addToCart } from "../redux/reducers/cartReducer";
-import { CustomErrorType } from "../types/api-types";
-import { CartItemType } from "../types/types";
 import { categoriesOptions, subCategoriesOptions } from "../sampleData/data.ts";
+import { CustomErrorType } from "../types/api-types";
 
 const Search = () => {
   const location = useLocation();
@@ -19,7 +16,6 @@ const Search = () => {
   const [category, setCategory] = useState<string>(categoryName || "");
   const [subCategory, setSubCategory] = useState<string>("");
   const [page, setPage] = useState<number>(1);
-  const dispatch = useDispatch();
 
   // get high price from all products data
   const {
@@ -30,7 +26,7 @@ const Search = () => {
   } = useHighestPriceQuery("");
   // set high price to initial value of max price
   useEffect(() => {
-    if (highPriceValue) setMaxPrice(highPriceValue.data[0].price);
+    if (highPriceValue) setMaxPrice(highPriceValue?.data[0]?.price);
   }, [highPriceValue]);
   // getting all categories dynamically
   //   const { data: categories, isError, error, isLoading: categoryLoading } = useAllCategoriesQuery("");
@@ -52,26 +48,13 @@ const Search = () => {
   //   }
   if (isProductError) {
     const Error = productError as CustomErrorType;
-    toast.error(Error?.data?.message);
+    toast.error(Error?.data?.message || "Some Error Ocurred");
   }
   if (highPriceIsError) {
     const Error = highPriceError as CustomErrorType;
-    toast.error(Error?.data?.message);
+    toast.error(Error?.data?.message || "Some Error Ocurred");
   }
 
-  // add to cart handler function
-  const addToCartHandler = (e: React.MouseEvent<HTMLButtonElement>, cartItem: CartItemType) => {
-    try {
-      e.stopPropagation();
-      if (cartItem.stock < 1) return toast.error(`${cartItem.name} is out of stock`);
-      dispatch(addToCart(cartItem));
-      toast.success("Product Added To Cart");
-      return;
-    } catch (error) {
-      toast.error("Product Already In Cart");
-      throw error;
-    }
-  };
   return (
     <div className="productSearchPage">
       {/* ====== Aside ======= */}
@@ -93,7 +76,7 @@ const Search = () => {
           <input
             type="range"
             min={500}
-            max={!highPriceLoading ? highPriceValue?.data[0].price : 500000}
+            max={!highPriceLoading ? highPriceValue?.data[0]?.price : 500000}
             id="maxPrice"
             value={maxPrice}
             onChange={(e) => setMaxPrice(parseInt(e.target.value))}
@@ -104,9 +87,9 @@ const Search = () => {
           <h4>Categories</h4>
           <select id="category" value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="">All</option>
-            {categoriesOptions.map((category, i) => (
-              <option key={i} value={`${category.toLowerCase()}`}>
-                {category.toUpperCase()}
+            {categoriesOptions?.map((category, i) => (
+              <option key={i} value={`${category?.toLowerCase()}`}>
+                {category?.toUpperCase()}
               </option>
             ))}
           </select>
@@ -116,9 +99,9 @@ const Search = () => {
             <h4>Sub Categories</h4>
             <select id="sub category" value={subCategory} onChange={(e) => setSubCategory(e.target.value)}>
               <option value="">All</option>
-              {subCategoriesOptions?.[category].map((subCategory, i) => (
-                <option key={i} value={`${subCategory.toLowerCase()}`}>
-                  {subCategory.toUpperCase()}
+              {subCategoriesOptions?.[category]?.map((subCategory, i) => (
+                <option key={i} value={`${subCategory?.toLowerCase()}`}>
+                  {subCategory?.toUpperCase()}
                 </option>
               ))}
             </select>
@@ -142,15 +125,14 @@ const Search = () => {
           {isProductLoading ? (
             <Skeleton length={6} bgColor="gray" height="3rem" />
           ) : (
-            searchProducts?.data?.filteredProducts.map((product) => (
+            searchProducts?.data?.filteredProducts?.map((product) => (
               <ProductCard
-                key={product._id}
-                productId={product._id}
-                name={product.name}
-                photo={product.photos[0]}
-                stock={product.stock}
-                price={product.price}
-                handler={addToCartHandler}
+                key={product?._id}
+                productId={product?._id}
+                name={product?.name}
+                photo={product?.photos[0]}
+                stock={product?.stock}
+                price={product?.price}
               />
             ))
           )}

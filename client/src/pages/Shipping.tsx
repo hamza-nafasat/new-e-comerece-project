@@ -1,11 +1,14 @@
 import axios from "axios";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import toast from "react-hot-toast";
 import { BiArrowBack } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { saveShippingInfo } from "../redux/reducers/cartReducer";
-import { StoreRootState, backendServerUrl } from "../redux/store/store";
+import { useCreateOrderMutation } from "../redux/api/orderApi";
+import { resetCart } from "../redux/reducers/cartReducer";
+import { backendServerUrl, StoreRootState } from "../redux/store/store";
+import { NewOrderDateTypes } from "../types/types";
+import { responseToast } from "../utils/features";
 
 interface InitialState {
   address: string;
@@ -25,8 +28,19 @@ const initialState: InitialState = {
 const Shipping = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { cartItem, total } = useSelector((state: StoreRootState) => state.cartReducer);
+  const { user } = useSelector((state: StoreRootState) => state.userReducer);
   const [shippingInfo, setShippingInfo] = useState<InitialState>(initialState);
+  const [createOrder] = useCreateOrderMutation();
+  const [loading, setIsLoading] = useState(false);
+
+  const {
+    subtotal,
+    tax,
+    shippingCharges,
+    total: totalAmount,
+    discount,
+    cartItem: cartItemSelected,
+  } = useSelector((state: StoreRootState) => state.cartReducer);
 
   const inputOnChangeHandler = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     e.preventDefault();
@@ -34,27 +48,66 @@ const Shipping = () => {
   };
 
   const submitHandler = async (e: ChangeEvent<HTMLFormElement>) => {
+    if (cartItemSelected?.length <= 0) return navigate("/cart");
+    setIsLoading(true);
     e.preventDefault();
-    dispatch(saveShippingInfo({ ...shippingInfo, pinCode: Number(shippingInfo.pinCode) }));
+    if (
+      !shippingInfo.address ||
+      !shippingInfo.city ||
+      !shippingInfo.country ||
+      !shippingInfo.pinCode ||
+      !shippingInfo.state
+    ) {
+      return toast.error("Please Enter Full Shipping info");
+    }
+    let subject = `One Order Placed By ${user?.name} and this user details are \n\n${JSON.stringify({
+      name: user?.name,
+      email: user?.email,
+      gender: user?.gender,
+    })}\n\n and Total Amount Details are \n\n${JSON.stringify({
+      subtotal,
+      tax,
+      shippingCharges,
+      discount,
+      totalAmount,
+    })}\n\n and Shipping Info is \n\n${JSON.stringify(shippingInfo)}\n\nProducts He Selected are \n\n`;
+    cartItemSelected.forEach((item, i) => {
+      subject += `${i}== name-${item?.name} quantity-${item?.quantity} price-${item?.price} size-${item?.productSize} category-${item?.category} subCategory-${item?.subCategory} productId-${item?.productId} color-${item?.colorDescription}  \n\n`;
+    });
+
+    const newOrderData: NewOrderDateTypes = {
+      userId: user?._id as string,
+      subtotal,
+      tax: tax,
+      shippingCharges: shippingCharges,
+      discount: discount,
+      total: totalAmount,
+      shippingInfo: shippingInfo,
+      cartItem: cartItemSelected,
+    };
+
+    console.log("new Order data", newOrderData);
+
     try {
       const { data } = await axios.post(
         `${backendServerUrl}/api/v1/payments/create`,
-        { amount: total },
+        { email: import.meta.env.VITE_EMAIL, subject },
         { headers: { "Content-Type": "application/json" } }
       );
       if (!data) return toast.error("Some Error Occurred. Please Try Again Later");
-      navigate("/checkout", { state: data.data.clientSecret });
-      setShippingInfo(initialState);
+      //  add order after success
+      const res = await createOrder(newOrderData);
+      dispatch(resetCart());
+      responseToast(res, navigate, "/orders");
     } catch (error) {
       console.log(error);
       toast.error("Some Error Occurred. Please Try Again Later");
       setShippingInfo(initialState);
+    } finally {
+      setIsLoading(false);
     }
   };
-  // navigate to cart if not any item in cart
-  useEffect(() => {
-    if (cartItem.length <= 0) navigate("/cart");
-  }, [cartItem, navigate]);
+
   return (
     <div className="shippingPage">
       <Link to={"/cart"} className="backBtn">
@@ -115,7 +168,9 @@ const Shipping = () => {
           placeholder="Enter Your PinCode"
           onChange={inputOnChangeHandler}
         />
-        <button type="submit">Pay Now</button>
+        <button disabled={loading} type="submit">
+          Place Order
+        </button>
       </form>
     </div>
   );

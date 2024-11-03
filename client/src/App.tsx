@@ -24,7 +24,6 @@ const Login = lazy(() => import("./pages/Login"));
 // AUTHENTIC USER ONLY
 const Shipping = lazy(() => import("./pages/Shipping"));
 const Orders = lazy(() => import("./pages/Orders"));
-const CheckOut = lazy(() => import("./pages/CheckOut"));
 // ==================================
 // ========== ADMIN ROUTES ==========
 // ==================================
@@ -90,7 +89,6 @@ const App = () => {
           <Route element={<ProtectedRoute isAuthenticated={user ? true : false} />}>
             <Route path="/shipping" element={<Shipping />} />
             <Route path="/orders" element={<Orders />} />
-            <Route path="/checkout" element={<CheckOut />} />
           </Route>
           {/* ============================ */}
           {/* ======== ADMIN ONLY ======== */}

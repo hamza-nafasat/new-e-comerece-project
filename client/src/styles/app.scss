@@ -85,6 +85,7 @@ a {
   border-radius: 5px;
   background-color: $white;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1);
+
   > a,
   > button {
     border: none;
@@ -98,6 +99,12 @@ a {
     }
     &:active {
       opacity: 0.7;
+    }
+    > img {
+      @include square(1.7rem);
+      object-fit: contain;
+      margin: 0;
+      padding: 0;
     }
   }
   > button {
