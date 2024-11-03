@@ -75,7 +75,7 @@ const Search = () => {
           <h4>Max Price: {maxPrice ?? ""}</h4>
           <input
             type="range"
-            min={500}
+            min={50}
             max={!highPriceLoading ? highPriceValue?.data[0]?.price : 500000}
             id="maxPrice"
             value={maxPrice}

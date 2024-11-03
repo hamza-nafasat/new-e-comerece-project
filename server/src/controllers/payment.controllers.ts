@@ -5,7 +5,6 @@ import CustomError from "../utils/customClass.js";
 import { responseFunc } from "../utils/features.js";
 import { CouponCodeTypes } from "../types/apis.types.js";
 import { isValidObjectId } from "mongoose";
-import { myStripe } from "../app.js";
 import { sendMail } from "../utils/sendMail.js";
 
 // ================================================

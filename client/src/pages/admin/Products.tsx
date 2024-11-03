@@ -65,7 +65,7 @@ const Products = () => {
   useEffect(() => {
     if (data) {
       const dataForTable = data?.data?.map((product) => ({
-        photo: <img src={product.photos?.[0].url} alt={product?.name} />,
+        photo: <img src={product?.photos?.[0]?.url} alt={product?.name} />,
         price: product?.price,
         name: product?.name,
         category: product?.category,

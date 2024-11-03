@@ -296,6 +296,12 @@ const ModalComponent = ({
       productId: productId,
       userId: user?._id,
     });
+
+    setFormData({
+      username: "",
+      rating: "",
+      message: "",
+    });
     onClose();
   };
 

@@ -10,12 +10,11 @@ import paymentRoutes from "./routes/payment.routes.js";
 import statsRoutes from "./routes/stats.routes.js";
 import productsRoutes from "./routes/products.routes.js";
 import { customErrorMiddleWare } from "./middlewares/errorHandler.js";
-import Stripe from "stripe";
 import cors from "cors";
 import { configureCloudinary } from "./utils/cloudinary.js";
 
 config({
-    path: "./.env",
+  path: "./.env",
 });
 
 // Constant Variables
@@ -23,20 +22,16 @@ const app = express();
 const port = process.env.PORT || 5000;
 const mongoUrl = process.env.MONGODB_URL || "";
 const dbName = process.env.DB_NAME || "";
-const stripeKey = process.env.STRIPE_SECRET_KEY || "";
 
 // Node Cashing
 export const nodeCash = new NodeCache();
 
-// Stripe Integration
-export const myStripe = new Stripe(stripeKey);
-
 // Other Middlewares
 app.use(
-    cors({
-        origin: "*",
-        credentials: true,
-    })
+  cors({
+    origin: "*",
+    credentials: true,
+  })
 );
 app.use(express.json());
 app.use(morgan("dev"));
@@ -49,7 +44,7 @@ app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/admin", statsRoutes);
 
 app.get("/", (req: Request, res: Response) => {
-    res.send(`App is running on <a href={${process.env.FRONTEND_ULR}}>Frontend url</a>`);
+  res.send(`App is running on <a href={${process.env.FRONTEND_ULR}}>Frontend url</a>`);
 });
 
 // Static Folder for Pics
@@ -61,13 +56,13 @@ app.use(customErrorMiddleWare);
 // CONNECTING MONGODB ASYNCHRONOUSLY
 // =================================
 (async () => {
-    try {
-        await configureCloudinary();
-        await connectDB(mongoUrl, dbName);
-        //// Server id Listing if database successfully connected
-        app.listen(port, () => console.log(`app listening on ${port}`));
-    } catch (err: any) {
-        console.error(`Failed to start server ${err.message}`);
-        process.exit(1);
-    }
+  try {
+    await configureCloudinary();
+    await connectDB(mongoUrl, dbName);
+    //// Server id Listing if database successfully connected
+    app.listen(port, () => console.log(`app listening on ${port}`));
+  } catch (err: any) {
+    console.error(`Failed to start server ${err.message}`);
+    process.exit(1);
+  }
 })();
