@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import BoysPic from "../assets/web-images/boy.png";
-import GirlsPic from "../assets/web-images/girl.png";
+import GirlsPic from "../assets/web-images/girl.jpg";
 import MensPic from "../assets/web-images/men.png";
 import WomensPic from "../assets/web-images/women.png";
 import { SampleProductCard } from "../components/ProductCard";
@@ -14,7 +14,11 @@ const Home = () => {
       <img src={banner} alt="banner" loading="lazy" />
       <section>
         <h2>Products Categories</h2>
-        <Link to={"/search"} className="findMore" aria-label="more products link">
+        <Link
+          to={"/search"}
+          className="findMore"
+          aria-label="more products link"
+        >
           See all products
         </Link>
       </section>

@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import AdminAside from "../../../components/admin/AdminAside";
@@ -7,7 +7,7 @@ import { useCreateNewProductMutation } from "../../../redux/api/productApi";
 import { StoreRootState } from "../../../redux/store/store";
 import { responseToast } from "../../../utils/features";
 
-import { categoriesOptions, subCategoriesOptions } from "../../../sampleData/data";
+import { categoriesOptions } from "../../../sampleData/data";
 
 const NewProduct = () => {
   const [name, setName] = useState<string>("");
@@ -15,6 +15,8 @@ const NewProduct = () => {
   const [subCategory, setSubCategory] = useState<string>("");
   const [price, setPrice] = useState<number>();
   const [offerPrice, setOfferPrice] = useState<number>();
+  const [sizes, setSizes] = useState<string>("");
+  const [colors, setColors] = useState<string>("");
   const [stock, setStock] = useState<number>();
   const [photos, setPhotos] = useState<File[]>([]);
   const [previewPhotos, setPreviewPhotos] = useState<string[]>([]);
@@ -77,7 +79,17 @@ const NewProduct = () => {
     setButtonLoading(true);
 
     // Ensure all required fields, including the Size Chart photo, are provided
-    if (!photos.length || !name || (stock && stock < 0) || !category || !price || !sizeChartPhoto) {
+    if (
+      !photos.length ||
+      !name ||
+      (stock && stock < 0) ||
+      !category ||
+      !price ||
+      !sizeChartPhoto ||
+      !subCategory ||
+      !sizes ||
+      !colors
+    ) {
       toast.error("Please enter all fields including the Size Chart photo.");
       setButtonLoading(false);
       return;
@@ -90,6 +102,8 @@ const NewProduct = () => {
       formData.append("stock", String(stock));
       formData.append("category", category);
       formData.append("subCategory", subCategory);
+      formData.append("sizes", sizes);
+      formData.append("colors", colors);
       if (offerPrice) formData.append("offerPrice", String(offerPrice));
 
       // Add sizeChartPhoto as a single file
@@ -139,9 +153,30 @@ const NewProduct = () => {
               />
             </div>
             <div>
-              <label htmlFor="newProductOfferPrice">Offer Price:</label>
+              <label htmlFor="newProductSizes">Sizes:</label>
               <input
                 required
+                type="text"
+                value={sizes}
+                id="newProductSizes"
+                placeholder="Enter product sizes"
+                onChange={(e) => setSizes(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="newProductColors">Colors:</label>
+              <input
+                required
+                type="text"
+                value={colors}
+                id="newProductColors"
+                placeholder="Enter product colors"
+                onChange={(e) => setColors(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="newProductOfferPrice">Offer Price:</label>
+              <input
                 type="number"
                 value={offerPrice}
                 id="newProductOfferPrice"
@@ -153,33 +188,24 @@ const NewProduct = () => {
               <label htmlFor="newProductCategory">Category:</label>
               <select required id="newProductCategory" value={category} onChange={handleCategoryChange}>
                 <option value="">Select Category</option>
-                {categoriesOptions.map((cat) => (
+                {categoriesOptions?.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat.charAt(0).toUpperCase() + cat.slice(1)}
                   </option>
                 ))}
               </select>
             </div>
-
-            {/* Subcategory Select */}
-            {category && (
-              <div>
-                <label htmlFor="newProductSubCategory">Sub Category:</label>
-                <select
-                  required
-                  id="newProductSubCategory"
-                  value={subCategory}
-                  onChange={(e) => setSubCategory(e.target.value)}
-                >
-                  <option value="">Select Sub Category</option>
-                  {subCategoriesOptions[category]?.map((sub: string, index: number) => (
-                    <option key={index} value={sub}>
-                      {sub.toUpperCase()}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            <div>
+              <label htmlFor="newProductSubCategory">Sub Category:</label>
+              <input
+                required
+                type="text"
+                value={subCategory}
+                id="newProductSubCategory"
+                placeholder="Enter product sub category"
+                onChange={(e) => setSubCategory(e.target.value)}
+              />
+            </div>
             <div>
               <label htmlFor="newProductStock">Stock:</label>
               <input

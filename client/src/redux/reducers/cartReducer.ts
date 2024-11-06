@@ -2,10 +2,14 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { CartReducerInitState } from "../../types/reducer-types";
 import { CartItemType } from "../../types/types";
 
+type RemoveFromCartPayload = {
+  productId: string;
+  color: string;
+  size: string;
+};
 const initialState: CartReducerInitState = {
   isLoading: false,
   cartItem: [],
-  tax: 0,
   total: 0,
   subtotal: 0,
   discount: 0,
@@ -15,7 +19,6 @@ const initialState: CartReducerInitState = {
     city: "",
     country: "",
     state: "",
-    pinCode: 0,
   },
 };
 
@@ -25,12 +28,14 @@ export const cartReducer = createSlice({
   reducers: {
     addToCart: (state, action: PayloadAction<CartItemType>) => {
       state.isLoading = true;
-      const index = state.cartItem.findIndex((item) => item.productId === action.payload.productId);
-      if (index !== -1) {
-        throw Error("Product Already In Cart");
-      } else {
-        state.cartItem = [...state.cartItem, action.payload];
-      }
+      // const index = state.cartItem.findIndex(
+      //   (item) => item.productId === action.payload.productId
+      // );
+      // if (index !== -1) {
+      //   throw Error("Product Already In Cart");
+      // } else {
+      state.cartItem = [...state.cartItem, action.payload];
+      // }
       state.isLoading = false;
     },
     updateCart: (state, action: PayloadAction<CartItemType>) => {
@@ -41,23 +46,33 @@ export const cartReducer = createSlice({
       }
       state.isLoading = false;
     },
-    removeFromCart: (state, action: PayloadAction<string>) => {
+    removeFromCart: (state, action: PayloadAction<RemoveFromCartPayload>) => {
       state.isLoading = true;
-      state.cartItem = state.cartItem.filter((item) => item.productId !== action.payload);
+      state.cartItem = state.cartItem.filter((item) => {
+        return (
+          item.productId !== action.payload?.productId ||
+          item?.colorDescription?.toLocaleLowerCase() !== action.payload?.color?.toLocaleLowerCase() ||
+          item?.productSize?.toLocaleLowerCase() !== action.payload?.size?.toLocaleLowerCase()
+        );
+      });
       state.isLoading = false;
     },
     calculatePrise: (state) => {
       state.isLoading = true;
       state.subtotal = state.cartItem.reduce((acc, item) => acc + item.price * item.quantity, 0);
-      state.shippingCharges = state.subtotal > 5000 || state.subtotal <= 0 ? 0 : 200;
-      state.tax = Math.round(state.subtotal * 0.18);
-      state.total = state.subtotal + state.tax + state.shippingCharges - state.discount;
+      state.shippingCharges = 200;
+      state.total = state.subtotal + state.shippingCharges;
       state.isLoading = false;
     },
     discountApplied: (state, action: PayloadAction<number>) => {
       state.isLoading = true;
       state.discount = action.payload;
-      state.total = state.subtotal + state.tax + state.shippingCharges - state.discount;
+      if (state.discount === 0) {
+        state.total = Number(state.subtotal) + Number(state.shippingCharges);
+      } else {
+        state.total =
+          Number(state.subtotal) * (Number(state.discount) / 100) + Number(state.shippingCharges);
+      }
       state.isLoading = false;
     },
     saveShippingInfo: (state, action: PayloadAction<CartReducerInitState["shippingInfo"]>) => {

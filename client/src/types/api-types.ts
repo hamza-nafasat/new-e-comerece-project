@@ -52,6 +52,7 @@ export interface SearchProductsTypes {
   data: {
     totalPages: number;
     filteredProducts: ProductTypes[];
+    subCategories: string[];
   };
 }
 export interface SearchProductsQueryTypes {

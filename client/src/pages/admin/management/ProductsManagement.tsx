@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import { FaTrash } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -13,9 +13,9 @@ import {
   useUpdateSingleProductMutation,
 } from "../../../redux/api/productApi";
 import { StoreRootState } from "../../../redux/store/store";
+import { categoriesOptions } from "../../../sampleData/data";
 import { CustomErrorType } from "../../../types/api-types";
 import { responseToast } from "../../../utils/features";
-import { categoriesOptions, subCategoriesOptions } from "../../../sampleData/data";
 
 const ProductsManagement = () => {
   const params = useParams();
@@ -29,6 +29,8 @@ const ProductsManagement = () => {
   const [updatedCategory, setUpdatedCategory] = useState("");
   const [updatedSubCategory, setUpdatedSubCategory] = useState("");
   const [updatedOfferPrice, setUpdatedOfferPrice] = useState<number>();
+  const [updatedColors, setUpdatedColors] = useState<string>("");
+  const [updatedSizes, setUpdatedSizes] = useState<string>("");
 
   const [oldPHotos, setOldPHotos] = useState<{ url: string; publicId: string }[]>([]);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
@@ -52,7 +54,18 @@ const ProductsManagement = () => {
   // Populate the fields with fetched data on load
   useEffect(() => {
     if (data && data.data) {
-      const { name, price, stock, category, subCategory, photos, sizeChartPhoto, offerPrice } = data.data;
+      const {
+        name,
+        price,
+        stock,
+        category,
+        subCategory,
+        photos,
+        sizeChartPhoto,
+        offerPrice,
+        colors,
+        sizes,
+      } = data.data;
       setUpdatedName(name);
       setUpdatedPrice(price as number);
       setUpdatedStock(stock as number);
@@ -61,6 +74,8 @@ const ProductsManagement = () => {
       setUpdatedSubCategory(subCategory);
       setUpdatedOfferPrice(offerPrice as number);
       setUpdatedSizeChartPhoto(sizeChartPhoto.url);
+      setUpdatedColors(colors?.join(",") || "");
+      setUpdatedSizes(sizes?.join(",") || "");
     }
   }, [data]);
 
@@ -123,6 +138,8 @@ const ProductsManagement = () => {
     formData.append("price", String(updatedPrice! > 0 ? updatedPrice : 0));
     formData.append("stock", String(updatedStock! > 0 ? updatedStock : 0));
     formData.append("category", updatedCategory);
+    if (updatedSizes) formData.append("sizes", updatedSizes);
+    if (updatedColors) formData.append("colors", updatedColors);
     if (updatedOfferPrice! > 0) formData.append("offerPrice", String(updatedOfferPrice));
     if (updatedSubCategory) formData.append("subCategory", updatedSubCategory);
 
@@ -228,6 +245,28 @@ const ProductsManagement = () => {
                 />
               </div>
               <div>
+                <label htmlFor="productSizes">Sizes:</label>
+                <input
+                  required
+                  type="text"
+                  value={updatedSizes}
+                  id="productSizes"
+                  placeholder="Enter product sizes"
+                  onChange={(e) => setUpdatedSizes(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="productColors">Colors:</label>
+                <input
+                  required
+                  type="text"
+                  value={updatedColors}
+                  id="productColors"
+                  placeholder="Enter product colors"
+                  onChange={(e) => setUpdatedColors(e.target.value)}
+                />
+              </div>
+              <div>
                 <label htmlFor="productPrice">Price:</label>
                 <input
                   type="number"
@@ -277,26 +316,17 @@ const ProductsManagement = () => {
                   ))}
                 </select>
               </div>
-
               {/* Subcategory Select */}
-              {updatedCategory && (
-                <div>
-                  <label htmlFor="newProductSubCategory">Sub Category:</label>
-                  <select
-                    required
-                    id="newProductSubCategory"
-                    value={updatedSubCategory}
-                    onChange={(e) => setUpdatedSubCategory(e.target.value)}
-                  >
-                    <option value="">Select Sub Category</option>
-                    {subCategoriesOptions[updatedCategory]?.map((sub: string, index: number) => (
-                      <option key={index} value={sub}>
-                        {sub.toUpperCase()}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              <div>
+                <label htmlFor="newProductSubCategory">Sub Category:</label>
+                <input
+                  type="text"
+                  value={updatedSubCategory}
+                  id="newProductSubCategory"
+                  placeholder="Enter product Sub Category"
+                  onChange={(e) => setUpdatedSubCategory(e.target.value)}
+                />
+              </div>
               <div>
                 <label htmlFor="sizeChartPhoto">Size Chart Photo:</label>
                 <input type="file" id="sizeChartPhoto" onChange={changeSizeChartPhotoHandler} />

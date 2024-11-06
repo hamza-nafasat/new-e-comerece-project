@@ -9,16 +9,27 @@ type ProductsProps = {
   };
   stock: number;
   price: number;
+  offerPrice: number;
 };
 
-const ProductCard = ({ name, photo, price, productId }: ProductsProps) => {
+const ProductCard = ({ name, photo, price, productId, offerPrice }: ProductsProps) => {
   const navigate = useNavigate();
   return (
-    <div className="productCard">
-      <img src={photo?.url} alt={name} loading="lazy" />
-      <p>{name}</p>
-      <span>{price} Rs</span>
-      <div onClick={() => navigate(`/product/${productId}`)}></div>
+    <div onClick={() => navigate(`/product/${productId}`)} className="productCard">
+      <img src={photo?.url} alt={name} loading="lazy" className="product-image" />
+      <hr className="hr" />
+      <p className="product-name">{name}</p>
+      {!offerPrice ? (
+        <span className="product-price">Rs {price} </span>
+      ) : (
+        <div className="productPriceWithOfferPrice">
+          <span style={{ textDecoration: "line-through" }} className="product-price">
+            Rs {price}{" "}
+          </span>
+          <span className="product-offer-price">{offerPrice} </span>
+        </div>
+      )}
+      <div onClick={() => navigate(`/product/${productId}`)} className="product-hover" />
     </div>
   );
 };

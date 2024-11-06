@@ -12,6 +12,5 @@ export interface CartReducerInitState {
   shippingCharges: number;
   total: number;
   subtotal: number;
-  tax: number;
   discount: number;
 }

@@ -1,9 +1,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import { VscError } from "react-icons/vsc";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import CartItemCard from "../components/CartItemCard";
 import { Skeleton } from "../components/Loader";
 import { calculatePrise, discountApplied, removeFromCart, updateCart } from "../redux/reducers/cartReducer";
@@ -12,7 +12,8 @@ import { CartItemType } from "../types/types";
 
 const Cart = () => {
   const dispatch = useDispatch();
-  const { discount, isLoading, cartItem, shippingCharges, subtotal, tax, total } = useSelector(
+  const { user } = useSelector((state: StoreRootState) => state.userReducer);
+  const { discount, isLoading, cartItem, shippingCharges, subtotal, total } = useSelector(
     (state: StoreRootState) => state.cartReducer
   );
 
@@ -20,9 +21,10 @@ const Cart = () => {
   const [isValidCoupon, setIsValidCoupon] = useState<boolean>(false);
 
   // remove from cart handler function
-  const removeFromCartHandler = (productId: string) => {
+  const removeFromCartHandler = (productId: string, color: string, size: string) => {
+    console.log(cartItem, productId, color, size);
     try {
-      dispatch(removeFromCart(productId));
+      dispatch(removeFromCart({ productId, color, size }));
       toast.success("Product Removed From Cart");
       return;
     } catch (error) {
@@ -80,7 +82,8 @@ const Cart = () => {
       clearTimeout(timOutId);
       cancel("cancelled");
     };
-  }, [coupon, dispatch]);
+  }, [coupon, dispatch, subtotal]);
+  if (!user?._id) return <Navigate to="/login" />;
 
   return (
     <div className="cartPage">
@@ -98,18 +101,17 @@ const Cart = () => {
             />
           ))
         ) : (
-          <h2>your cart is empty</h2>
+          <h2>Your cart is empty</h2>
         )}
       </main>
       <aside>
-        <p>Subtotal = {subtotal} Rs</p>
-        <p>Shipping = {shippingCharges} Rs</p>
+        <p>Subtotal = Rs {subtotal} </p>
+        <p>Shipping = Rs {shippingCharges} </p>
         <p>
-          Discount = <em className={discount > 0 ? "green" : "red"}> {discount} Rs</em>
+          Discount = <em className={discount > 0 ? "green" : "red"}>{discount}% </em>
         </p>
-        <p>Tax = {tax} Rs</p>
         <p>
-          <b>Total Amount = {total} Rs</b>
+          <b>Total Amount = Rs {total} </b>
         </p>
         <input
           type="text"
@@ -120,10 +122,10 @@ const Cart = () => {
         />
         {coupon ? (
           isValidCoupon ? (
-            <span className="green">{discount} Rs Off Using This Coupon</span>
+            <span className="green">{discount}% Off Using This Coupon</span>
           ) : (
             <span className="red">
-              Invalid Coupon Code <VscError />
+              Invalid or Expired Coupon Code <VscError />
             </span>
           )
         ) : undefined}

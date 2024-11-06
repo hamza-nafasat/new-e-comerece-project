@@ -1,9 +1,11 @@
 import { onAuthStateChanged } from "firebase/auth";
 import { Suspense, lazy, useEffect } from "react";
-import { Toaster } from "react-hot-toast";
+import { ToastContainer } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
+import "react-toastify/dist/ReactToastify.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import Loader from "./components/Loader";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { auth } from "./firebase";
@@ -123,7 +125,8 @@ const App = () => {
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </Suspense>
-      <Toaster position="top-right" />
+      <Footer />
+      <ToastContainer />
     </BrowserRouter>
   );
 };

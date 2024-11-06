@@ -1,78 +1,75 @@
 import { signOut } from "firebase/auth";
-import { useState } from "react";
-import toast from "react-hot-toast";
-import { FaCartPlus, FaSearch, FaSignInAlt, FaUserTie } from "react-icons/fa";
-import { IoHome } from "react-icons/io5";
+import { FaCartPlus } from "react-icons/fa";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import logiImage from "../assets/web-images/logo.jpeg";
 import { auth } from "../firebase";
+import { StoreRootState } from "../redux/store/store";
 import { User } from "../types/types";
 
 interface HeaderPropTypes {
   user: User | null;
 }
+
 const Header = ({ user }: HeaderPropTypes) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isRegisterOpen, setIsRegisterOpen] = useState<boolean>(false);
-  const onClose = () => {
-    setIsOpen(false);
-  };
+  const { cartItem } = useSelector((state: StoreRootState) => state.cartReducer);
   const logOutHandler = async () => {
     try {
       await signOut(auth);
-      onClose();
       toast.success("Logout Successfully");
     } catch (error) {
-      onClose();
       toast.error("Logout Failed Please Try Again Lated");
       throw error;
     }
   };
   return (
     <nav className="header">
-      <Link onClick={onClose} to={"/"} aria-label="home page">
-        <IoHome />
-      </Link>
-      <Link onClick={onClose} to={"/search"} aria-label="search page">
-        <FaSearch />
-      </Link>
-      <Link onClick={onClose} to={"/cart"} aria-label="cart page">
-        <FaCartPlus />
-      </Link>
+      <img height={100} src={logiImage} alt="logo image" />
+      <div>
+        <Link to={"/"} aria-label="home page">
+          Home
+        </Link>
+        <Link to={"/search"} aria-label="search page">
+          Products
+        </Link>
+
+        {user?.role == "admin" ? (
+          <Link to={"/admin/dashboard"} aria-label="admin page">
+            Admin
+          </Link>
+        ) : (
+          <Link to={"/orders"} aria-label="admin page">
+            Orders
+          </Link>
+        )}
+      </div>
       {/* IF USER LOGIN */}
       {/* ============= */}
       {user?._id ? (
-        <>
-          <button title="profile" onClick={() => setIsOpen((prev) => !prev)}>
-            <FaUserTie />
+        <div className="logoutButton">
+          <div className="cartDiv">
+            <Link to={"/cart"} aria-label="cart page">
+              <FaCartPlus />
+            </Link>
+            {cartItem?.length > 0 && <span>{cartItem.length}</span>}
+          </div>
+          <button className="logout" title="Logout" onClick={logOutHandler}>
+            {/* <Logout /> */}
+            Logout
           </button>
-          <dialog open={isOpen}>
-            <div>
-              {user?.role === "admin" ? (
-                <Link onClick={onClose} to={"/admin/dashboard"} aria-label="admin page">
-                  Admin
-                </Link>
-              ) : undefined}
-              <Link onClick={onClose} to={"/orders"} aria-label="admin page">
-                Orders
-              </Link>
-              <button onClick={logOutHandler}>Logout</button>
-            </div>
-          </dialog>
-        </>
+        </div>
       ) : (
         <>
           {/* IF USER NOT LOGIN */}
           {/* ================= */}
-          <button onClick={() => setIsRegisterOpen((prev) => !prev)}>
-            <FaSignInAlt />
-          </button>
-          <dialog open={isRegisterOpen}>
-            <div>
-              <Link onClick={() => setIsRegisterOpen(false)} to={"/login"} aria-label="login page">
-                Login
-              </Link>
-            </div>
-          </dialog>
+
+          <div className="loginButton">
+            <Link className="login" to={"/login"} title="Login" aria-label="login page">
+              {/* <Login /> */}
+              Login
+            </Link>
+          </div>
         </>
       )}
     </nav>

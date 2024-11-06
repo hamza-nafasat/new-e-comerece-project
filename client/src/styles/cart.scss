@@ -55,6 +55,12 @@
     border-bottom: 2px solid $gray;
     margin-bottom: 1rem;
     padding: 1rem 2rem;
+    .cartItemSizeColor {
+      @include flex(column, center, center, 0.5rem);
+      > span {
+        text-transform: capitalize;
+      }
+    }
     &:hover {
       box-shadow: 0px 10px 5px rgba(0, 0, 0, 0.2);
       border-bottom: none;
@@ -68,13 +74,15 @@
       @include flex(column, center, flex-start, 0.25rem);
       > a {
         font-size: 1rem;
+        font-weight: 600;
         color: $black;
         &:hover {
           color: $blueButton;
         }
       }
       > span {
-        font-weight: 700;
+        font-size: 1rem;
+        font-weight: 400;
       }
     }
     > div {
@@ -125,8 +133,10 @@
 
 @media screen and (width < 600px) {
   .cartPage {
+    min-height: fit-content;
     main {
       overflow-x: auto;
+      overflow-y: none;
     }
   }
 }

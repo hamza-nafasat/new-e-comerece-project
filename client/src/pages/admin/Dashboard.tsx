@@ -1,4 +1,4 @@
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import { BiMaleFemale } from "react-icons/bi";
 import { BsSearch } from "react-icons/bs";
 import { FaRegBell } from "react-icons/fa";
@@ -136,7 +136,7 @@ const WidgetItem = ({ heading, value, percent, getColor, amount = false }: Widge
     <section className="widgetItem">
       <section className="widgetInfo">
         <p>{heading}</p>
-        <h4>{amount ? `$${value}` : value}</h4>
+        <h4>{amount ? `Rs${value}` : value}</h4>
         {percent > 0 ? (
           <span style={{ color: color }}>
             <HiTrendingUp /> +{percent}%

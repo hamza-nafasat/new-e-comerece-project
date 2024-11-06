@@ -1,30 +1,94 @@
+.productCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: $white;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.product-image {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.hr {
+  width: 100%;
+  margin: 10px 0 0 0;
+  border-color: $black;
+}
+
+.product-name {
+  font-weight: 600;
+  font-size: 1.2rem;
+  text-align: center;
+  color: black;
+  margin: 0.5rem 0;
+}
+
+.product-price {
+  font-weight: 500;
+  font-size: 1rem;
+  color: black;
+}
+@media (max-width: 768px) {
+  .productCard {
+    padding: 8px;
+  }
+  .product-image {
+    max-height: 150px;
+  }
+  .product-name {
+    font-size: 1.1rem;
+  }
+  .product-price {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .productCard {
+    padding: 6px;
+  }
+  .product-image {
+    max-height: 120px;
+  }
+  .product-name {
+    font-size: 1rem;
+  }
+  .product-price {
+    font-size: 0.85rem;
+  }
+}
+
 .homePage {
   background-color: $white;
   width: 100%;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 3rem 2rem 1rem;
+  padding: 2rem 2rem 1rem;
+
   > img {
     width: 100%;
-    height: 15rem;
-    margin: auto;
-    object-fit: cover;
+    object-fit: contain;
   }
+
   > section {
     @include flex(row, space-between);
     margin: 1rem 2px 0;
-    > h2 {
-      @include heading(1px);
-    }
+
+    > h2,
     > .findMore {
       @include heading(1px);
-      font-size: 1rem;
+      font-size: 1.2rem;
+      font-weight: 600;
     }
   }
+
   > main {
     @include customScrollbar(block, 12px, 6px);
-    @include flex(row, space-between, center, 1rem);
+    @include flex(row, center, center, 1rem);
     width: 100%;
     flex: 1;
     overflow-x: auto;
@@ -32,142 +96,160 @@
   }
 }
 
-.productCard {
-  @include flex(column, space-around, center, 4px);
+.sampleProductCard {
+  @include flex(column, space-between, center, 2px);
   user-select: none;
   position: relative;
-  padding: 1rem;
-  height: 12rem;
-  width: 12rem;
+  height: auto;
+  width: 100%;
+  max-width: 13rem;
   flex: none;
   border-radius: 10px;
-  background-color: $white;
-  // background-color: red;
+  background-color: lighten($white, 5%);
+  cursor: pointer;
+  padding: 1rem;
+  margin: 1rem 0;
+
   > img {
-    @include square(calc(14rem - 5rem));
-    max-height: 100px;
+    width: 100%;
     object-fit: contain;
     margin: 0.5rem;
     mix-blend-mode: multiply;
     border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.1);
   }
+
   > span {
-    font-weight: 500;
-    font-size: 1.1rem;
+    font-weight: 600;
+    font-size: 1.2rem;
   }
-  > div {
+
+  > div.overlay {
     @include flex;
-    @include square(100%);
     position: absolute;
-    opacity: 0;
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
     border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.1);
     cursor: pointer;
-    background-color: rgba(0, 0, 0, 0.3);
+    transition: opacity 0.3s ease;
+
     &:hover {
       opacity: 1;
     }
+
     > button {
       @include flex;
       @include square(3rem);
       border-radius: 50%;
       border: none;
-      outline: none;
-      cursor: pointer;
       background-color: $blueButton;
       color: $white;
       font-size: 1.5rem;
-      transition: all 0.3s;
+      transition: transform 0.3s;
+
       &:hover {
-        rotate: 90deg;
+        transform: rotate(90deg);
       }
     }
-  }
-}
-.sampleProductCard {
-  @include flex(column, space-around, center, 2px);
-  user-select: none;
-  position: relative;
-  // padding: 1rem;
-  height: 13rem;
-  width: 13rem;
-  margin-bottom: 2rem;
-  flex: none;
-  border-radius: 10px;
-  background-color: $white;
-  cursor: pointer;
-  > img {
-    height: 90%;
-    width: 90%;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    margin: 0.5rem;
-    mix-blend-mode: multiply;
-    border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.3);
-  }
-  > span {
-    font-weight: 500;
-    font-size: 1.1rem;
   }
 }
 
-@media screen and (width < 700px) {
+@media screen and (min-width: 950px) and (max-width: 1100px) {
   .homePage {
-    padding: 1rem;
-    > img {
-      height: 14rem;
-      margin: auto;
-      object-fit: cover;
-    }
-    > section {
-      @include flex(row, space-between);
-      margin: 1rem 2px 0;
-      > h2 {
-        font-size: 1rem !important;
-      }
-      > .findMore {
-        font-size: 0.8rem;
-      }
-    }
+    padding: 2rem 1rem;
+
     > main {
-      // @include customScrollbar(block, 12px, 6px);
-      @include flex(row, space-between, center, 1rem);
-      width: 100%;
-      flex: 1;
-      flex-wrap: wrap !important;
-      row-gap: 2rem !important;
-      justify-content: center !important;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
       align-items: center;
     }
   }
+
+  .sampleProductCard {
+    height: auto;
+    max-width: 11rem;
+  }
 }
 
-@media screen and (width < 400px) {
+@media screen and (max-width: 950px) {
   .homePage {
-    padding-top: 3rem;
-    > img {
-      height: 6rem;
-    }
+    padding: 2rem 1rem 1rem;
+
     > section {
-      @include flex(row, space-between);
       margin: 1rem 2px 0;
-      > h2 {
-        font-size: 0.8rem !important;
-      }
+
+      > h2,
       > .findMore {
-        font-size: 0.8rem;
+        font-size: 1.1rem;
+        font-weight: 600;
       }
     }
+
     > main {
-      row-gap: 1rem !important;
-      justify-content: center !important;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+
+  .sampleProductCard {
+    height: auto;
+    max-width: 10rem;
+  }
+}
+
+@media screen and (max-width: 700px) {
+  .homePage {
+    padding: 1rem !important;
+
+    > section > h2,
+    > section > .findMore {
+      font-size: 0.8rem;
+      font-weight: 550;
+    }
+
+    > main {
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      row-gap: 0.2rem;
       .sampleProductCard {
-        height: 8rem !important;
-        width: 8rem !important;
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-bottom: 0;
       }
     }
+  }
+
+  .sampleProductCard {
+    height: auto;
+    max-width: 9rem;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .homePage {
+    padding-top: 1rem;
+
+    > section > h2,
+    > section > .findMore {
+      font-size: 0.5rem;
+      font-weight: 500;
+    }
+
+    > main {
+      gap: 1rem;
+      row-gap: 0.2rem;
+    }
+  }
+
+  .sampleProductCard {
+    height: auto;
+    max-width: 8rem;
   }
 }

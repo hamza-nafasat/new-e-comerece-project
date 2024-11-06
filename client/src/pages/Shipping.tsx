@@ -1,6 +1,6 @@
 import axios from "axios";
 import { ChangeEvent, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import { BiArrowBack } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -15,14 +15,12 @@ interface InitialState {
   state: string;
   city: string;
   country: string;
-  pinCode: number;
 }
 const initialState: InitialState = {
   address: "",
   state: "",
   city: "",
   country: "",
-  pinCode: 0,
 };
 
 const Shipping = () => {
@@ -35,7 +33,6 @@ const Shipping = () => {
 
   const {
     subtotal,
-    tax,
     shippingCharges,
     total: totalAmount,
     discount,
@@ -51,13 +48,7 @@ const Shipping = () => {
     if (cartItemSelected?.length <= 0) return navigate("/cart");
     setIsLoading(true);
     e.preventDefault();
-    if (
-      !shippingInfo.address ||
-      !shippingInfo.city ||
-      !shippingInfo.country ||
-      !shippingInfo.pinCode ||
-      !shippingInfo.state
-    ) {
+    if (!shippingInfo.address || !shippingInfo.city || !shippingInfo.country || !shippingInfo.state) {
       return toast.error("Please Enter Full Shipping info");
     }
     let subject = `One Order Placed By ${user?.name} and this user details are \n\n${JSON.stringify({
@@ -66,7 +57,6 @@ const Shipping = () => {
       gender: user?.gender,
     })}\n\n and Total Amount Details are \n\n${JSON.stringify({
       subtotal,
-      tax,
       shippingCharges,
       discount,
       totalAmount,
@@ -78,7 +68,6 @@ const Shipping = () => {
     const newOrderData: NewOrderDateTypes = {
       userId: user?._id as string,
       subtotal,
-      tax: tax,
       shippingCharges: shippingCharges,
       discount: discount,
       total: totalAmount,
@@ -91,7 +80,7 @@ const Shipping = () => {
     try {
       const { data } = await axios.post(
         `${backendServerUrl}/api/v1/payments/create`,
-        { email: import.meta.env.VITE_EMAIL, subject },
+        { adminEmail: import.meta.env.VITE_EMAIL, subject, clientEmail: user?.email },
         { headers: { "Content-Type": "application/json" } }
       );
       if (!data) return toast.error("Some Error Occurred. Please Try Again Later");
@@ -158,16 +147,6 @@ const Shipping = () => {
           <option value="pakistan">Pakistan</option>
           <option value="india">India</option>
         </select>
-        <input
-          required
-          id="pinCode"
-          type="number"
-          name="pinCode"
-          autoComplete="postal-code"
-          value={shippingInfo.pinCode}
-          placeholder="Enter Your PinCode"
-          onChange={inputOnChangeHandler}
-        />
         <button disabled={loading} type="submit">
           Place Order
         </button>

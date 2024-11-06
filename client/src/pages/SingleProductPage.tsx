@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import StarIcon from "../assets/StarIcon";
@@ -40,7 +40,11 @@ const SingleProductPage = () => {
 
   const addToCartHandler = (e: React.MouseEvent<HTMLButtonElement>, cartItem: CartItemType) => {
     try {
-      if (!cartItem.colorDescription || !cartItem.productSize) {
+      if (!user?._id) return toast.error("Please Login First Then You Can Add Products in Cart");
+      if (
+        (!cartItem?.colorDescription && product?.colors?.length) ||
+        (product?.sizes?.length && !cartItem.productSize)
+      ) {
         return toast.error("Please Select size and color");
       }
       if (
@@ -58,7 +62,7 @@ const SingleProductPage = () => {
         return toast.error("Please Select All Fields");
       }
       e.stopPropagation();
-      if (cartItem.stock < 1) return toast.error(`${cartItem.name} is out of stock`);
+      if (cartItem?.stock < 1) return toast.error(`${cartItem?.name} is out of stock`);
       dispatch(addToCart(cartItem));
       toast.success("Product Added To Cart");
       return;
@@ -111,9 +115,13 @@ const SingleProductPage = () => {
         createdAt: data?.data?.createdAt?.split("T")[0],
         updatedAt: data?.data?.updatedAt?.split("T")[0],
         banner: data?.data?.photos?.[0],
-        otherImages: data?.data?.photos?.slice(1).concat(data?.data?.sizeChartPhoto),
+        otherImages: data?.data?.photos?.slice(1),
+        sizeChart: data?.data?.sizeChartPhoto,
         reviews: data?.data?.reviews?.slice(0, 5),
+        sizes: data?.data?.sizes,
+        colors: data?.data?.colors,
       };
+      console.log(productData);
       setProduct(productData);
     }
   }, [data]);
@@ -133,74 +141,75 @@ const SingleProductPage = () => {
               ))}
             </div>
           </section>
+          <img className="sizeChart" src={product?.sizeChart?.url} alt="size chart" />
         </section>
         {/* product image section  */}
         <section className="showImagesSection">
           <div className="details">
             <div>
-              <p>Product Name</p>
-              <h4>{product?.name}</h4>
+              <h4>Product Name</h4>
+              <p>{product?.name}</p>
               <hr />
             </div>
 
             {product?.offerPrice > 0 ? (
               <div>
-                <p>Product Price</p>
-                <h4>
-                  <span className="firstSpan">{product?.price}Rs</span>
-                  <span className="secondSpan">{product?.offerPrice}Rs</span>
-                </h4>
+                <h4>Product Price</h4>
+                <p>
+                  <span className="secondSpan">Rs {product?.offerPrice}</span>
+                </p>
                 <hr />
               </div>
             ) : (
               <div>
-                <p>Product Price</p>
-                <h4>{product?.price}</h4>
+                <h4>Product Price</h4>
+                <p>{product?.price}</p>
                 <hr />
               </div>
             )}
             <div>
-              <p>Product Stock</p>
-              <h4>{product?.stock}</h4>
+              <h4>Product Category</h4>
+              <p>{product?.category}</p>
               <hr />
             </div>
             <div>
-              <p>Product Category</p>
-              <h4>{product?.category}</h4>
+              <h4>Product Sub Category</h4>
+              <p>{product?.subCategory}</p>
               <hr />
-            </div>
-            <div>
-              <p>Product Sub Category</p>
-              <h4>{product?.subCategory}</h4>
             </div>
             <div className="singleProductDetailsInputDiv">
               <label htmlFor="size">Size</label>
               <select name="size" id="size" value={size} onChange={(e) => setSize(e.target.value)}>
                 <option value="">Select Size</option>
-                <option value="XS">XS</option>
-                <option value="S">S</option>
-                <option value="M">M</option>
-                <option value="L">L</option>
-                <option value="XL">XL</option>
-                <option value="XXL">XXL</option>
+                {product?.sizes?.map((size: any, i: number) => (
+                  <option key={i} value={size}>
+                    {size?.toUpperCase()}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="singleProductDetailsInputDiv">
-              <label htmlFor="colorDescription">Color Description</label>
-              <input
-                type="text"
-                name="colorDescription"
-                id="colorDescription"
+              <label htmlFor="color">Color</label>
+              <select
+                name="color"
+                id="color"
                 value={colorDescription}
                 onChange={(e) => setColorDescription(e.target.value)}
-              />
+              >
+                <option value="">Select Color</option>
+                {product?.colors?.map((color: any, i: number) => (
+                  <option key={i} value={color}>
+                    {color?.toUpperCase()}
+                  </option>
+                ))}
+              </select>
             </div>
             <button
               onClick={(e) =>
                 addToCartHandler(e, {
                   name: product?.name,
                   photo: product?.banner,
-                  price: product?.price,
+                  price: product?.offerPrice ? product?.offerPrice : product?.price,
                   productId: product?._id,
                   stock: product?.stock,
                   quantity: 1,

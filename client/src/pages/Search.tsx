@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import { useLocation } from "react-router-dom";
 import { Skeleton } from "../components/Loader";
 import ProductCard from "../components/ProductCard";
 import { useAllSearchProductQuery, useHighestPriceQuery } from "../redux/api/productApi";
-import { categoriesOptions, subCategoriesOptions } from "../sampleData/data.ts";
+import { categoriesOptions } from "../sampleData/data.ts";
 import { CustomErrorType } from "../types/api-types";
 
 const Search = () => {
@@ -99,7 +99,7 @@ const Search = () => {
             <h4>Sub Categories</h4>
             <select id="sub category" value={subCategory} onChange={(e) => setSubCategory(e.target.value)}>
               <option value="">All</option>
-              {subCategoriesOptions?.[category]?.map((subCategory, i) => (
+              {searchProducts?.data?.subCategories?.map((subCategory, i) => (
                 <option key={i} value={`${subCategory?.toLowerCase()}`}>
                   {subCategory?.toUpperCase()}
                 </option>
@@ -133,6 +133,7 @@ const Search = () => {
                 photo={product?.photos[0]}
                 stock={product?.stock}
                 price={product?.price}
+                offerPrice={product?.offerPrice}
               />
             ))
           )}
