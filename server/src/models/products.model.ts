@@ -6,6 +6,8 @@ const productSchema = new mongoose.Schema<ProductSchemaTypes>(
     name: { type: String, required: [true, "Please entered product name"] },
     price: { type: Number, required: [true, "Please entered product price"] },
     offerPrice: { type: Number, default: 0 },
+    sizes: { type: [String], default: [] },
+    colors: { type: [String], default: [] },
     stock: { type: Number, required: [true, "Please entered product stock"] },
     photos: [
       { type: { publicId: { type: String, required: true }, url: { type: String, required: true } } },

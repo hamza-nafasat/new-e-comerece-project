@@ -15,6 +15,8 @@ export interface CreateNewProductTypes {
   stock: number;
   category: string;
   offerPrice: number;
+  sizes: string;
+  colors: string;
   subCategory: string;
 }
 
@@ -42,6 +44,7 @@ export interface searchBaseQueryTypes {
 
 export interface CouponCodeTypes {
   couponCode: string;
+  expireAt: Date;
   amount: number;
 }
 

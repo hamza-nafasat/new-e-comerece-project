@@ -13,13 +13,13 @@ import { sendMail } from "../utils/sendMail.js";
 // GET SINGLE PRODUCT
 
 export const createNewCoupon = TryCatch(async (req: Request<{}, {}, CouponCodeTypes>, res, next) => {
-  const { couponCode, amount } = req.body;
-  if (!couponCode || !amount) {
+  const { couponCode, amount, expireAt } = req.body;
+  if (!couponCode || !amount || !expireAt) {
     return next(new CustomError("Please Enter Coupon Code And Amount First", 400));
   }
-  const newCoupon = await Coupon.create({ couponCode, amount });
+  const newCoupon = await Coupon.create({ couponCode, amount, expireAt });
   if (!newCoupon) return next(new CustomError("Error While Creating Coupon Code", 500));
-  responseFunc(res, `Coupon ${newCoupon.couponCode} Generated for ${newCoupon.amount}-Rs`, 201);
+  responseFunc(res, `Coupon ${newCoupon.couponCode} Generated for ${newCoupon.amount} Percent`, 201);
 });
 // ================================================
 // http://localhost:8000/api/v1/payments/coupon/all
@@ -27,7 +27,7 @@ export const createNewCoupon = TryCatch(async (req: Request<{}, {}, CouponCodeTy
 // GET ALL COUPON
 
 export const getAllCoupons = TryCatch(async (req, res, next) => {
-  const coupons = await Coupon.find();
+  const coupons = await Coupon.find({ expireAt: { $gt: Date.now() } });
   if (!coupons) return next(new CustomError("Not Any Coupon Found", 404));
   responseFunc(res, ``, 200, coupons);
 });
@@ -40,7 +40,7 @@ export const getAllCoupons = TryCatch(async (req, res, next) => {
 export const getSingleCoupon = TryCatch(async (req, res, next) => {
   const { couponCode } = req.params;
   if (!couponCode) return next(new CustomError("Invalid Coupon Code", 400));
-  const discount = await Coupon.findOne({ couponCode });
+  const discount = await Coupon.findOne({ couponCode, expireAt: { $gt: Date.now() } });
   if (!discount) return next(new CustomError("Invalid Coupon Code", 400));
   responseFunc(res, ``, 200, discount.amount);
 });
@@ -66,8 +66,9 @@ export const deleteSingleCoupon = TryCatch(async (req, res, next) => {
 // CREATE NEW PAYMENT
 
 export const createPaymentIntent = TryCatch(async (req, res, next) => {
-  const { email, subject } = req.body;
-  const isSent = await sendMail(email, "Order Placed", `${subject}`);
-  if (!isSent) return next(new CustomError("Error While Sending Mail", 500));
+  const { clientEmail, adminEmail, subject } = req.body;
+  const isAdminSent = await sendMail(clientEmail, "Order Placed", `${subject}`);
+  const isClientSent = await sendMail(adminEmail, "Order Placed", `${subject}`);
+  if (!isAdminSent || !isClientSent) return next(new CustomError("Error While Sending Mail", 500));
   responseFunc(res, `Your Order Placed Successfully`, 200);
 });

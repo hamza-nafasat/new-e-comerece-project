@@ -18,7 +18,11 @@ import {
 
 export const dashboardStats = TryCatch(async (req, res, next) => {
   const today = new Date();
-  const lastSixMonthDate = new Date(today.getFullYear(), today.getMonth() - 6, 1);
+  const lastSixMonthDate = new Date(
+    today.getFullYear(),
+    today.getMonth() - 6,
+    1
+  );
   const thisMonth = {
     start: new Date(today.getFullYear(), today.getMonth(), 1),
     end: today,
@@ -98,14 +102,29 @@ export const dashboardStats = TryCatch(async (req, res, next) => {
       }).select("total createdAt"),
       Product.distinct("category"),
       User.countDocuments({ gender: "female" }),
-      Order.find().sort({ createdAt: -1 }).limit(5).select(["discount", "status", "total", "cartItem"]),
+      Order.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select(["discount", "status", "total", "cartItem"]),
     ]);
     //// calculate the percentage between this and last month
     //// ----------------------------------------------------
     const thisToLastMonthPercentage = {
-      products: Math.min(100, calculatePercentage(thisMonthProducts?.length, lastMonthProducts?.length)),
-      users: Math.min(100, calculatePercentage(thisMonthUsers?.length, lastMonthUsers?.length)),
-      orders: Math.min(100, calculatePercentage(thisMonthOrders?.length, lastMonthOrders?.length)),
+      products: Math.min(
+        100,
+        calculatePercentage(
+          thisMonthProducts?.length,
+          lastMonthProducts?.length
+        )
+      ),
+      users: Math.min(
+        100,
+        calculatePercentage(thisMonthUsers?.length, lastMonthUsers?.length)
+      ),
+      orders: Math.min(
+        100,
+        calculatePercentage(thisMonthOrders?.length, lastMonthOrders?.length)
+      ),
       revenue: Math.min(
         100,
         calculatePercentage(
@@ -121,7 +140,10 @@ export const dashboardStats = TryCatch(async (req, res, next) => {
       products: productsCount,
       users: usersCount,
       orders: ordersCount,
-      revenue: ordersForRevenue.reduce((acc, order) => acc + (order.total || 0), 0),
+      revenue: ordersForRevenue.reduce(
+        (acc, order) => acc + (order.total || 0),
+        0
+      ),
     };
     //// making the revenue and transaction chart data for last six months
     //// -----------------------------------------------------------------
@@ -158,7 +180,10 @@ export const dashboardStats = TryCatch(async (req, res, next) => {
     adminStats = {
       thisToLastMonthPercentage,
       totalCounts,
-      TransactionAndRevenueChartData: { transactionCountData, totalRevenueData },
+      TransactionAndRevenueChartData: {
+        transactionCountData,
+        totalRevenueData,
+      },
       inventoryProductsCategoryPercentage,
       userChartData,
       latestTransactionsData,
@@ -197,7 +222,7 @@ export const getPieCharts = TryCatch(async (req, res, next) => {
       Product.countDocuments(),
       Product.distinct("category"),
       Product.countDocuments({ stock: { $lte: 0 } }),
-      Order.find().select(["tax", "shippingCharges", "discount", "total", "subTotal"]),
+      Order.find().select(["shippingCharges", "discount", "total", "subTotal"]),
       User.find().select("dob"),
       User.countDocuments({ role: "admin" }),
     ]);
@@ -222,26 +247,33 @@ export const getPieCharts = TryCatch(async (req, res, next) => {
     };
     //// data for revenue distribution Chart
     //// -----------------------------------
-    const allRevenue = allOrders.reduce((total, order) => total + (order.total || 0), 0);
-    const allDiscount = allOrders.reduce((total, order) => total + (order.discount || 0), 0);
+    const allRevenue = allOrders.reduce(
+      (total, order) => total + (order.total || 0),
+      0
+    );
+    const allDiscount = allOrders.reduce(
+      (total, order) => total + (order.discount || 0),
+      0
+    );
     const marketingCost = Math.round(allRevenue * (30 / 100));
-    const totalTax = allOrders.reduce((total, order) => total + (order.tax || 0), 0);
     const totalShippingCharges = allOrders.reduce(
       (total, order) => total + (order.shippingCharges || 0),
       0
     );
     const revenueDistribution = {
-      netMargin: allRevenue - allDiscount - totalShippingCharges - totalTax - marketingCost,
+      netMargin:
+        allRevenue - allDiscount - totalShippingCharges - marketingCost,
       discount: allDiscount,
       productionCost: totalShippingCharges,
-      burnt: totalTax,
       totalEarning: allRevenue,
     };
     //// users age group chart data
     //// --------------------------
     const usersAgeRatio = {
       teen: allUsersData.filter((item) => Number(item.age) < 18).length,
-      adult: allUsersData.filter((item) => Number(item.age) >= 18 && Number(item.age) < 40).length,
+      adult: allUsersData.filter(
+        (item) => Number(item.age) >= 18 && Number(item.age) < 40
+      ).length,
       old: allUsersData.filter((item) => Number(item.age) >= 40).length,
     };
     //// admin customers charts data
@@ -260,7 +292,8 @@ export const getPieCharts = TryCatch(async (req, res, next) => {
       usersAgeRatio,
       adminCustomerRatio,
     };
-    if (!adminPieChartsData) return next(new CustomError("Admin Pie Charts Data Not Found", 404));
+    if (!adminPieChartsData)
+      return next(new CustomError("Admin Pie Charts Data Not Found", 404));
     nodeCash.set(nodeCashKey, JSON.stringify(adminPieChartsData));
   }
 
@@ -276,26 +309,41 @@ export const getBarCharts = TryCatch(async (req, res, next) => {
   let nodeCashKey = "admin-bar-charts";
   let adminBarChartsData;
   const today = new Date();
-  const sixMonthAgoDate = new Date(today.getFullYear(), today.getMonth() - 6, 1);
+  const sixMonthAgoDate = new Date(
+    today.getFullYear(),
+    today.getMonth() - 6,
+    1
+  );
   const oneYearAgoDate = new Date(today.getFullYear() - 1, today.getMonth(), 1);
   if (nodeCash.has(nodeCashKey)) {
     adminBarChartsData = JSON.parse(nodeCash.get(nodeCashKey) as string);
   } else {
     //// all queries in promise.all for optimization
     //// -------------------------------------------
-    const lastSixMonthQuery = { createdAt: { $lte: today, $gte: sixMonthAgoDate } };
-    const lastOneYearQuery = { createdAt: { $lte: today, $gte: oneYearAgoDate } };
-    const [lastSixMonthProducts, lastSixMonthUsers, lastOneYearOrders] = await Promise.all([
-      Product.find(lastSixMonthQuery).select("createdAt"),
-      User.find(lastSixMonthQuery).select("createdAt"),
-      Order.find(lastOneYearQuery).select("createdAt"),
-    ]);
+    const lastSixMonthQuery = {
+      createdAt: { $lte: today, $gte: sixMonthAgoDate },
+    };
+    const lastOneYearQuery = {
+      createdAt: { $lte: today, $gte: oneYearAgoDate },
+    };
+    const [lastSixMonthProducts, lastSixMonthUsers, lastOneYearOrders] =
+      await Promise.all([
+        Product.find(lastSixMonthQuery).select("createdAt"),
+        User.find(lastSixMonthQuery).select("createdAt"),
+        Order.find(lastOneYearQuery).select("createdAt"),
+      ]);
     //// last six month products and customers
     //// -------------------------------------
     let sixMonthProductArr = new Array(6).fill(0);
     let sixMonthUsersArr = new Array(6).fill(0);
-    updateArraysByMonthDifference({ data: lastSixMonthProducts, countData: sixMonthProductArr });
-    updateArraysByMonthDifference({ data: lastSixMonthUsers, countData: sixMonthUsersArr });
+    updateArraysByMonthDifference({
+      data: lastSixMonthProducts,
+      countData: sixMonthProductArr,
+    });
+    updateArraysByMonthDifference({
+      data: lastSixMonthUsers,
+      countData: sixMonthUsersArr,
+    });
     const sixMonthProductsAndCustomers = {
       products: sixMonthProductArr,
       Customers: sixMonthUsersArr,
@@ -303,11 +351,15 @@ export const getBarCharts = TryCatch(async (req, res, next) => {
     //// last One Year Orders
     //// --------------------
     let lastYearOrdersArr = new Array(12).fill(0);
-    updateArraysByMonthDifference({ data: lastOneYearOrders, countData: lastYearOrdersArr });
+    updateArraysByMonthDifference({
+      data: lastOneYearOrders,
+      countData: lastYearOrdersArr,
+    });
     //// adding both carts data in adminBarChartsData
     //// --------------------------------------------
     adminBarChartsData = { sixMonthProductsAndCustomers, lastYearOrdersArr };
-    if (!adminBarChartsData) return next(new CustomError("Admin Bar Chart Data NOt Found", 500));
+    if (!adminBarChartsData)
+      return next(new CustomError("Admin Bar Chart Data NOt Found", 500));
     nodeCash.set(nodeCashKey, JSON.stringify(adminBarChartsData));
   }
   responseFunc(res, ``, 200, adminBarChartsData);
@@ -328,7 +380,9 @@ export const getLineCharts = TryCatch(async (req, res, next) => {
   } else {
     //// all queries in promise.all for optimization
     //// -------------------------------------------
-    const lastOneYearQuery = { createdAt: { $lte: today, $gte: oneYearAgoDate } };
+    const lastOneYearQuery = {
+      createdAt: { $lte: today, $gte: oneYearAgoDate },
+    };
     const [oneYearUsers, oneYearProducts, oneYearOrders] = await Promise.all([
       User.find(lastOneYearQuery).select("createdAt"),
       Product.find(lastOneYearQuery).select("createdAt"),
@@ -341,17 +395,30 @@ export const getLineCharts = TryCatch(async (req, res, next) => {
     let oneYearProductsArr = new Array(12).fill(0);
     let oneYearRevenueArr = new Array(12).fill(0);
     let oneYearDiscountsArr = new Array(12).fill(0);
-    updateArraysByMonthDifference({ data: oneYearUsers, countData: oneYearUserArr });
-    updateArraysByMonthDifference({ data: oneYearProducts, countData: oneYearProductsArr });
-    updateArraysByMonthDifference({ data: oneYearOrders, totalData: oneYearRevenueArr });
-    updateArraysByMonthDifference({ data: oneYearOrders, totalDiscount: oneYearDiscountsArr });
+    updateArraysByMonthDifference({
+      data: oneYearUsers,
+      countData: oneYearUserArr,
+    });
+    updateArraysByMonthDifference({
+      data: oneYearProducts,
+      countData: oneYearProductsArr,
+    });
+    updateArraysByMonthDifference({
+      data: oneYearOrders,
+      totalData: oneYearRevenueArr,
+    });
+    updateArraysByMonthDifference({
+      data: oneYearOrders,
+      totalDiscount: oneYearDiscountsArr,
+    });
     adminLineChartsData = {
       oneYearUserArr,
       oneYearProductsArr,
       oneYearRevenueArr,
       oneYearDiscountsArr,
     };
-    if (!adminLineChartsData) return next(new CustomError("Admin Line Chart Data Not Found", 500));
+    if (!adminLineChartsData)
+      return next(new CustomError("Admin Line Chart Data Not Found", 500));
     nodeCash.set(nodeCashKey, JSON.stringify(adminLineChartsData));
   }
   responseFunc(res, ``, 200, adminLineChartsData);

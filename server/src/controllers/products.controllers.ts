@@ -15,7 +15,7 @@ import getDataUri from "../utils/uriParser.js";
 
 export const createNewProduct = TryCatch(
   async (req: Request<{}, {}, CreateNewProductTypes>, res: Response, next: NextFunction) => {
-    const { name, price, stock, category, subCategory, offerPrice = 0 } = req.body;
+    let { name, price, stock, category, subCategory, offerPrice = 0, sizes, colors } = req.body;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     // Separate the size chart photo and product photos based on their fieldname
@@ -30,7 +30,9 @@ export const createNewProduct = TryCatch(
       !category ||
       !subCategory ||
       !productPhotos.length ||
-      !sizeChartPhoto
+      !sizeChartPhoto ||
+      !sizes ||
+      !colors
     ) {
       return next(
         new CustomError(
@@ -40,6 +42,8 @@ export const createNewProduct = TryCatch(
       );
     }
 
+    let sizesArr = sizes.split(",");
+    let colorsArr = colors.split(",");
     // Check if a product with the same name already exists
     let existingProduct = await Product.findOne({ name: name.toLowerCase() });
     if (existingProduct) {
@@ -72,6 +76,8 @@ export const createNewProduct = TryCatch(
         publicId: sizeChartPhotoCloud.public_id,
         url: sizeChartPhotoCloud.secure_url,
       },
+      sizes: sizesArr,
+      colors: colorsArr,
     });
 
     // Invalidate cache if necessary and send a success response
@@ -197,7 +203,7 @@ export const updateProduct = TryCatch(async (req, res, next) => {
   // Separate the size chart photo and product photos based on their fieldname
   const sizeChartPhoto = files.sizeChartPhoto ? files.sizeChartPhoto[0] : null;
   const productPhotos = files.photos || [];
-  const { name, stock, price, category, subCategory, offerPrice = 0 } = req.body;
+  const { name, stock, price, category, subCategory, offerPrice = 0, sizes, colors } = req.body;
   //// if not provided anything
   if (
     !name &&
@@ -207,7 +213,9 @@ export const updateProduct = TryCatch(async (req, res, next) => {
     !sizeChartPhoto &&
     !productPhotos.length &&
     !subCategory &&
-    !offerPrice
+    !offerPrice &&
+    !sizes &&
+    !colors
   ) {
     return next(new CustomError("Please Enter Something First", 400));
   }
@@ -220,6 +228,8 @@ export const updateProduct = TryCatch(async (req, res, next) => {
   if (category) product.category = category;
   if (subCategory) product.subCategory = subCategory;
   if (offerPrice > 0) product.offerPrice = offerPrice;
+  if (sizes) product.sizes = sizes.split(",");
+  if (colors) product.colors = colors.split(",");
   if (productPhotos) {
     // Upload product photos to Cloudinary
     const photosCloud = await Promise.all(
@@ -280,7 +290,7 @@ export const getAllProducts = TryCatch(
       searchBaseQuery.subCategory = String(subCategory);
     }
     //// get filteredData and total count of data according search query in parallel promises
-    const [filteredProducts, totalSearchProducts] = await Promise.all([
+    const [filteredProducts, totalSearchProducts, totalSubCateGories] = await Promise.all([
       Product.find(searchBaseQuery)
         .skip(skipProducts)
         .limit(onePageLimit)
@@ -291,13 +301,20 @@ export const getAllProducts = TryCatch(
           }
         ),
       Product.countDocuments(searchBaseQuery),
+      Product?.find({ category: category }).select("subCategory"),
     ]);
     //// creating total page count according total product with searchBaseQuery
     const totalPages = Math.ceil(totalSearchProducts / onePageLimit);
     //// sending response with data
+
+    // find Total SubCategories
+    let subCategories = [
+      ...new Set(totalSubCateGories.map((subCategory: any) => subCategory?.subCategory)),
+    ];
     return responseFunc(res, "", 200, {
       totalPages,
       filteredProducts,
+      subCategories: category ? subCategories : [],
     });
   }
 );

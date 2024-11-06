@@ -19,6 +19,8 @@ export interface ProductSchemaTypes {
   reviews: [{ name: string; rating: number; comment: string }];
   photos: { publicId: string; url: string }[];
   sizeChartPhoto: { publicId: string; url: string };
+  sizes: string[];
+  colors: string[];
   category: string;
   subCategory: string;
   createdAt?: Date;
@@ -28,7 +30,6 @@ export interface ProductSchemaTypes {
 export interface OrderSchemaTypes {
   userId: string;
   subtotal: number;
-  tax: number;
   shippingCharges: number;
   discount: number;
   total: number;
@@ -40,7 +41,6 @@ export interface OrderSchemaTypes {
     city: string;
     state: string;
     country: string;
-    pinCode: number;
   };
   cartItem: [
     {
