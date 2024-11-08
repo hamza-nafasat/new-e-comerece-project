@@ -1,5 +1,5 @@
 import { onAuthStateChanged } from "firebase/auth";
-import { Suspense, lazy, useEffect } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import "react-toastify/dist/ReactToastify.css";
@@ -12,6 +12,7 @@ import { auth } from "./firebase";
 import { getUserFromDb } from "./redux/api/userApi";
 import { userExist, userNotExist } from "./redux/reducers/userReducer";
 import { userReducerInitState } from "./types/reducer-types";
+import { useGetBannerQuery } from "./redux/api/adminApi";
 
 // =================================
 // ========== USER ROUTES ==========
@@ -40,7 +41,7 @@ const LineCharts = lazy(() => import("./pages/admin/charts/LineCharts"));
 // APPS
 const Toss = lazy(() => import("./pages/admin/apps/Toss"));
 const Coupon = lazy(() => import("./pages/admin/apps/Coupon"));
-const Stopwatch = lazy(() => import("./pages/admin/apps/Stopwatch"));
+const AddBanner = lazy(() => import("./pages/admin/apps/AddBanner"));
 // MANAGEMENT
 const NewProduct = lazy(() => import("./pages/admin/management/NewProduct"));
 const ProductsManagement = lazy(() => import("./pages/admin/management/ProductsManagement"));
@@ -48,6 +49,9 @@ const TransactionManagement = lazy(() => import("./pages/admin/management/Transa
 
 const App = () => {
   const dispatch = useDispatch();
+  const [bannerImage, setBannerImage] = useState("");
+  const { data, refetch, isLoading: isBannerLoading } = useGetBannerQuery("");
+
   const { user, loading } = useSelector(
     (state: { userReducer: userReducerInitState }) => state.userReducer
   );
@@ -64,7 +68,11 @@ const App = () => {
     });
   }, [dispatch]);
 
-  return loading ? (
+  useEffect(() => {
+    if (data?.data) setBannerImage(data.data?.image?.url);
+  }, [data]);
+
+  return loading || isBannerLoading ? (
     <Loader />
   ) : (
     <BrowserRouter>
@@ -74,7 +82,7 @@ const App = () => {
           {/* ============================ */}
           {/* ====== USER ROUTES ========= */}
           {/* ============================ */}
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home bannerImage={bannerImage} />} />
           <Route path="/search" element={<Search />} />
           <Route path="/product/:id" element={<SingleProductPage />} />
           <Route path="/cart" element={<Cart />} />
@@ -115,7 +123,7 @@ const App = () => {
             {/* APPS  */}
             <Route path="/admin/app/toss" element={<Toss />} />
             <Route path="/admin/app/coupon" element={<Coupon />} />
-            <Route path="/admin/app/stopwatch" element={<Stopwatch />} />
+            <Route path="/admin/app/add-banner" element={<AddBanner refetch={refetch} />} />
             {/* MANAGEMENT  */}
             <Route path="/admin/product/new" element={<NewProduct />} />
             <Route path="/admin/products/single/:id" element={<ProductsManagement />} />

@@ -9,6 +9,7 @@ import orderRoutes from "./routes/orders.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import statsRoutes from "./routes/stats.routes.js";
 import productsRoutes from "./routes/products.routes.js";
+import dataRoutes from "./routes/data.routes.js";
 import { customErrorMiddleWare } from "./middlewares/errorHandler.js";
 import cors from "cors";
 import { configureCloudinary } from "./utils/cloudinary.js";
@@ -42,6 +43,7 @@ app.use("/api/v1/products", productsRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/admin", statsRoutes);
+app.use("/api/v1/admin", dataRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send(`App is running on <a href={${process.env.FRONTEND_ULR}}>Frontend url</a>`);

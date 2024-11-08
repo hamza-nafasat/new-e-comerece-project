@@ -115,3 +115,11 @@ export interface addReviewsTypes {
   gender: string;
   rating: string;
 }
+
+export interface BannerDataResponse {
+  success: boolean;
+  data: {
+    image: { publicId: string; url: string };
+    name: string;
+  };
+}
