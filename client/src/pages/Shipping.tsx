@@ -15,8 +15,10 @@ interface InitialState {
   state: string;
   city: string;
   country: string;
+  contact: string,
 }
 const initialState: InitialState = {
+  contact: "",
   address: "",
   state: "",
   city: "",
@@ -48,7 +50,7 @@ const Shipping = () => {
     if (cartItemSelected?.length <= 0) return navigate("/cart");
     setIsLoading(true);
     e.preventDefault();
-    if (!shippingInfo.address || !shippingInfo.city || !shippingInfo.country || !shippingInfo.state) {
+    if (!shippingInfo.address || !shippingInfo.city || !shippingInfo.country || !shippingInfo.state || !shippingInfo.contact) {
       return toast.error("Please Enter Full Shipping info");
     }
     let subject = `One Order Placed By ${user?.name} and this user details are \n\n${JSON.stringify({
@@ -104,6 +106,18 @@ const Shipping = () => {
       </Link>
       <form onSubmit={submitHandler}>
         <h2>Shipping Info</h2>
+        <input
+          required
+          autoFocus
+          id="contact"
+          type="number"
+          name="contact"
+          value={shippingInfo.contact}
+          placeholder="Enter Your Phone Number"
+          pattern="[0-9]{10}"
+          onChange={inputOnChangeHandler}
+        />
+
         <input
           required
           autoFocus

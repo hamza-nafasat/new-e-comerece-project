@@ -19,6 +19,7 @@ const productApi = createApi({
   reducerPath: "productApi",
   baseQuery: fetchBaseQuery({
     baseUrl: `${backendServerUrl}/api/v1/products/`,
+    credentials: "include",
   }),
   tagTypes: ["products"],
   endpoints: (builder) => ({
@@ -87,10 +88,7 @@ const productApi = createApi({
       invalidatesTags: ["products"],
     }),
     // 10
-    deletePhotoFromProduct: builder.mutation<
-      msgResponseTypes,
-      { id: string; publicId: string; productId: string }
-    >({
+    deletePhotoFromProduct: builder.mutation<msgResponseTypes, { id: string; publicId: string; productId: string }>({
       query: ({ id, publicId, productId }) => ({
         url: `delete-photo?id=${id}&publicId=${publicId}&productId=${productId}`,
         method: "DELETE",

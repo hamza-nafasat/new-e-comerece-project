@@ -14,6 +14,7 @@ export const adminApi = createApi({
   reducerPath: "adminApi",
   baseQuery: fetchBaseQuery({
     baseUrl: `${backendServerUrl}/api/v1/admin`,
+    credentials: "include",
   }),
   endpoints: (builder) => ({
     // 1. dashboard stats

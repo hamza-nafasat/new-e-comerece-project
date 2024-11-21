@@ -47,6 +47,7 @@ const SingleProductPage = () => {
       ) {
         return toast.error("Please Select size and color");
       }
+      if (cartItem?.stock < 1) return toast.error(`${cartItem?.name} is out of stock`);
       if (
         !cartItem?.colorDescription ||
         !cartItem.name ||
@@ -62,7 +63,6 @@ const SingleProductPage = () => {
         return toast.error("Please Select All Fields");
       }
       e.stopPropagation();
-      if (cartItem?.stock < 1) return toast.error(`${cartItem?.name} is out of stock`);
       dispatch(addToCart(cartItem));
       toast.success("Product Added To Cart");
       return;
@@ -360,13 +360,7 @@ const ModalComponent = ({
           </div>
           <div className="form-group">
             <label htmlFor="message">Message</label>
-            <textarea
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleInputChange}
-              required
-            />
+            <textarea id="message" name="message" value={formData.message} onChange={handleInputChange} required />
           </div>
           <button type="submit" className="submit-button">
             Submit

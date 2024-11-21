@@ -26,6 +26,7 @@ export type ProductTypes = {
 };
 
 export type ShippingInfoTypes = {
+  contact: string | undefined;
   address: string;
   city: string;
   state: string;

@@ -35,10 +35,7 @@ export const createNewProduct = TryCatch(
       !colors
     ) {
       return next(
-        new CustomError(
-          "Please enter all fields, including at least one product photo and a size chart photo",
-          400
-        )
+        new CustomError("Please enter all fields, including at least one product photo and a size chart photo", 400)
       );
     }
 
@@ -50,12 +47,13 @@ export const createNewProduct = TryCatch(
       return next(new CustomError("Please use a unique name for the new product", 409));
     }
 
-    // Upload product photos to Cloudinary
     const photosCloud = await Promise.all(
-      productPhotos.map(async (photo) => {
+      productPhotos.map((photo) => {
         const fileUrl = getDataUri(photo);
-        const myCloud: any = await uploadOnCloudinary(fileUrl.content!, "products");
-        return { publicId: myCloud.public_id, url: myCloud.secure_url };
+        return uploadOnCloudinary(fileUrl.content!, "products").then((myCloud: any) => ({
+          publicId: myCloud.public_id,
+          url: myCloud.secure_url,
+        }));
       })
     );
 
@@ -233,10 +231,12 @@ export const updateProduct = TryCatch(async (req, res, next) => {
   if (productPhotos) {
     // Upload product photos to Cloudinary
     const photosCloud = await Promise.all(
-      productPhotos.map(async (photo) => {
+      productPhotos.map((photo) => {
         const fileUrl = getDataUri(photo);
-        const myCloud: any = await uploadOnCloudinary(fileUrl.content!, "products");
-        return { publicId: myCloud.public_id, url: myCloud.secure_url };
+        return uploadOnCloudinary(fileUrl.content!, "products").then((myCloud: any) => ({
+          publicId: myCloud.public_id,
+          url: myCloud.secure_url,
+        }));
       })
     );
     product.photos = [...product?.photos, ...photosCloud];
@@ -264,60 +264,56 @@ export const updateProduct = TryCatch(async (req, res, next) => {
 // http://localhost:8000/api/v1/products/all-products =  ALL PRODUCTS FOR SEARCH AND FILTERS
 // ===================================================
 
-export const getAllProducts = TryCatch(
-  async (req: Request<{}, {}, {}, AllProductsQueryTypes>, res, next) => {
-    const { category, price, search, sort, subCategory } = req.query;
-    ////  creating a logic of pages dataLimit on one page and skip data on page change
-    const page = Number(req.query.page) || 1;
-    const onePageLimit = Number(process.env.PRODUCT_PER_PAGE) || 10;
-    const skipProducts = onePageLimit * (page - 1);
-    //// creating searchQuery according given fields
-    const searchBaseQuery: searchBaseQueryTypes = {};
-    if (search) {
-      searchBaseQuery.name = {
-        $regex: new RegExp(String(search), "i"),
-      };
-    }
-    if (price) {
-      searchBaseQuery.price = {
-        $lte: Number(price),
-      };
-    }
-    if (category) {
-      searchBaseQuery.category = String(category);
-    }
-    if (subCategory) {
-      searchBaseQuery.subCategory = String(subCategory);
-    }
-    //// get filteredData and total count of data according search query in parallel promises
-    const [filteredProducts, totalSearchProducts, totalSubCateGories] = await Promise.all([
-      Product.find(searchBaseQuery)
-        .skip(skipProducts)
-        .limit(onePageLimit)
-        .lean()
-        .sort(
-          sort && {
-            price: sort === "ascending" ? 1 : -1,
-          }
-        ),
-      Product.countDocuments(searchBaseQuery),
-      Product?.find({ category: category }).select("subCategory"),
-    ]);
-    //// creating total page count according total product with searchBaseQuery
-    const totalPages = Math.ceil(totalSearchProducts / onePageLimit);
-    //// sending response with data
-
-    // find Total SubCategories
-    let subCategories = [
-      ...new Set(totalSubCateGories.map((subCategory: any) => subCategory?.subCategory)),
-    ];
-    return responseFunc(res, "", 200, {
-      totalPages,
-      filteredProducts,
-      subCategories: category ? subCategories : [],
-    });
+export const getAllProducts = TryCatch(async (req: Request<{}, {}, {}, AllProductsQueryTypes>, res, next) => {
+  const { category, price, search, sort, subCategory } = req.query;
+  ////  creating a logic of pages dataLimit on one page and skip data on page change
+  const page = Number(req.query.page) || 1;
+  const onePageLimit = Number(process.env.PRODUCT_PER_PAGE) || 10;
+  const skipProducts = onePageLimit * (page - 1);
+  //// creating searchQuery according given fields
+  const searchBaseQuery: searchBaseQueryTypes = {};
+  if (search) {
+    searchBaseQuery.name = {
+      $regex: new RegExp(String(search), "i"),
+    };
   }
-);
+  if (price) {
+    searchBaseQuery.price = {
+      $lte: Number(price),
+    };
+  }
+  if (category) {
+    searchBaseQuery.category = String(category);
+  }
+  if (subCategory) {
+    searchBaseQuery.subCategory = String(subCategory);
+  }
+  //// get filteredData and total count of data according search query in parallel promises
+  const [filteredProducts, totalSearchProducts, totalSubCateGories] = await Promise.all([
+    Product.find(searchBaseQuery)
+      .skip(skipProducts)
+      .limit(onePageLimit)
+      .lean()
+      .sort(
+        sort && {
+          price: sort === "ascending" ? 1 : -1,
+        }
+      ),
+    Product.countDocuments(searchBaseQuery),
+    Product?.find({ category: category }).select("subCategory"),
+  ]);
+  //// creating total page count according total product with searchBaseQuery
+  const totalPages = Math.ceil(totalSearchProducts / onePageLimit);
+  //// sending response with data
+
+  // find Total SubCategories
+  let subCategories = [...new Set(totalSubCateGories.map((subCategory: any) => subCategory?.subCategory))];
+  return responseFunc(res, "", 200, {
+    totalPages,
+    filteredProducts,
+    subCategories: category ? subCategories : [],
+  });
+});
 
 export const deletePhotoFromProduct = TryCatch(async (req, res, next) => {
   console.log(req.params, req.query);

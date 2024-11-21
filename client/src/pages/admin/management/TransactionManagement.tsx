@@ -27,6 +27,7 @@ export type OrderItemType = {
 };
 export type OrderType = {
   name: string;
+  contact?: string;
   address: string;
   city: string;
   country: string;
@@ -96,6 +97,7 @@ const TransactionManagement = () => {
       if (data)
         setOrder({
           name: receivedData.userId?.name || "Deleted User",
+          contact: receivedData.shippingInfo?.contact || undefined,
           address: receivedData.shippingInfo.address,
           city: receivedData.shippingInfo.city,
           country: receivedData.shippingInfo.country,
@@ -149,6 +151,7 @@ const TransactionManagement = () => {
             <h2>Order Info</h2>
             <h5>User info</h5>
             <p>Name - {order.name}</p>
+            {order.contact && <p>contact - {order.contact}</p>}
             <p>Country - {order.country}</p>
             <p>Address - {`${order.address}, ${order.city}, ${order.state}`}</p>
             <h5>Amount Info</h5>

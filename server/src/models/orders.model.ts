@@ -38,6 +38,10 @@ const singleCartItem = {
 const orderSchema = new Schema<OrderSchemaTypes>(
   {
     shippingInfo: {
+      contact: {
+        type: String,
+        required: true,
+      },
       address: {
         type: String,
         required: true,
@@ -53,7 +57,7 @@ const orderSchema = new Schema<OrderSchemaTypes>(
       country: {
         type: String,
         required: true,
-      },
+      }
     },
     cartItem: [singleCartItem],
     userId: {

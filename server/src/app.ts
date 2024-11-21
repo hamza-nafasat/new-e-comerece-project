@@ -1,18 +1,17 @@
-import morgan from "morgan";
-import express from "express";
+import cors from "cors";
 import { config } from "dotenv";
+import express, { Request, Response } from "express";
+import morgan from "morgan";
 import NodeCache from "node-cache";
-import { Request, Response } from "express";
-import { calculateMonthDifference, connectDB } from "./utils/features.js";
-import usersRoutes from "./routes/users.routes.js";
+import { customErrorMiddleWare } from "./middlewares/errorHandler.js";
+import dataRoutes from "./routes/data.routes.js";
 import orderRoutes from "./routes/orders.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
-import statsRoutes from "./routes/stats.routes.js";
 import productsRoutes from "./routes/products.routes.js";
-import dataRoutes from "./routes/data.routes.js";
-import { customErrorMiddleWare } from "./middlewares/errorHandler.js";
-import cors from "cors";
+import statsRoutes from "./routes/stats.routes.js";
+import usersRoutes from "./routes/users.routes.js";
 import { configureCloudinary } from "./utils/cloudinary.js";
+import { connectDB } from "./utils/features.js";
 
 config({
   path: "./.env",
@@ -28,12 +27,20 @@ const dbName = process.env.DB_NAME || "";
 export const nodeCash = new NodeCache();
 
 // Other Middlewares
-app.use(
-  cors({
-    origin: "*",
-    credentials: true,
-  })
-);
+// const corsOptions: any = {
+//   origin: (origin: any, callback: any) => {
+//     const allowedOrigins = ["http://localhost:5173", "https://kooglearden.com"];
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   credentials: true,
+// };
+
+// // Use the CORS middleware
+// app.use(cors(corsOptions));
 app.use(express.json());
 app.use(morgan("dev"));
 

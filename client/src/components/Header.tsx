@@ -34,15 +34,16 @@ const Header = ({ user }: HeaderPropTypes) => {
           Products
         </Link>
 
-        {user?.role == "admin" ? (
-          <Link to={"/admin/dashboard"} aria-label="admin page">
-            Admin
-          </Link>
-        ) : (
-          <Link to={"/orders"} aria-label="admin page">
-            Orders
-          </Link>
-        )}
+        {user?._id &&
+          (user?.role == "admin" ? (
+            <Link to={"/admin/dashboard"} aria-label="admin page">
+              Admin
+            </Link>
+          ) : (
+            <Link to={"/orders"} aria-label="admin page">
+              Orders
+            </Link>
+          ))}
       </div>
       {/* IF USER LOGIN */}
       {/* ============= */}
