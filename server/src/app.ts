@@ -25,7 +25,7 @@ const dbName = process.env.DB_NAME || "";
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_ULR,
+    origin: [process.env.FRONTEND_ULR,"https://mern-e-commerce-2024.vercel.app"],
     credentials: true,
   })
 );
