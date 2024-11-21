@@ -23,6 +23,13 @@ const port = process.env.PORT || 5000;
 const mongoUrl = process.env.MONGODB_URL || "";
 const dbName = process.env.DB_NAME || "";
 
+app.use(
+  cors({
+    origin: process.env.FRONTEND_ULR,
+    credentials: true,
+  })
+);
+
 // Node Cashing
 export const nodeCash = new NodeCache();
 
@@ -53,7 +60,9 @@ app.use("/api/v1/admin", statsRoutes);
 app.use("/api/v1/admin", dataRoutes);
 
 app.get("/", (req: Request, res: Response) => {
-  res.send(`App is running on <a href={${process.env.FRONTEND_ULR}}>Frontend url</a>`);
+  res.send(
+    `App is running on <a href={${process.env.FRONTEND_ULR}}>Frontend url</a>`
+  );
 });
 
 // Static Folder for Pics
