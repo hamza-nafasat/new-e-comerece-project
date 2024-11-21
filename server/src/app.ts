@@ -22,10 +22,11 @@ const app = express();
 const port = process.env.PORT || 5000;
 const mongoUrl = process.env.MONGODB_URL || "";
 const dbName = process.env.DB_NAME || "";
+const frontendUrl=process.env.FRONTEND_ULR||"*"
 
 app.use(
   cors({
-    origin: [process.env.FRONTEND_ULR,"https://mern-e-commerce-2024.vercel.app"],
+    origin: [frontendUrl,"https://mern-e-commerce-2024.vercel.app"],
     credentials: true,
   })
 );
