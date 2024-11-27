@@ -71,7 +71,8 @@ export const cartReducer = createSlice({
       if (state.discount === 0) {
         state.total = Number(state.subtotal) + Number(state.shippingCharges);
       } else {
-        state.total = Number(state.subtotal) * (Number(state.discount) / 100) + Number(state.shippingCharges);
+        const discountAmount = (Number(state.subtotal) * state.discount) / 100;
+        state.total = Number(state.subtotal) - discountAmount + Number(state.shippingCharges);
       }
       state.isLoading = false;
     },
